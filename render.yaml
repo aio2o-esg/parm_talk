@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: sme-talk-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: alembic upgrade head && uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sme-talk-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_ALGORITHM
+        value: HS256
+      - key: JWT_EXPIRE_MINUTES
+        value: "1440"
+      - key: APP_ENV
+        value: production
+      - key: ALGOD_ADDRESS
+        value: https://testnet-api.algonode.cloud
+      - key: INDEXER_ADDRESS
+        value: https://testnet-idx.algonode.cloud
+
+databases:
+  - name: sme-talk-db
+    plan: free
+    databaseName: smetalk
+    user: smetalk
+
