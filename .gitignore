@@ -16,3 +16,4 @@ k8s/secrets/*.yaml
 .idea/
 .DS_Store
 backend/ai_analysis/data/*.csv
+tmp/*
