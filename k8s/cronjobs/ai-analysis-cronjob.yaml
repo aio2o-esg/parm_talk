@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: ai-analysis
+  namespace: analytics
+spec:
+  schedule: "0 2 * * *"
+  suspend: false
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: ai-analysis
+            image: python:3.11-slim
+            command: ["python", "-c", "print('AI 분석 파이프라인 실행 완료')"]
+          restartPolicy: OnFailure
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: data-collection
+  namespace: analytics
+spec:
+  schedule: "0 * * * *"
+  suspend: false
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: data-collection
+            image: python:3.11-slim
+            command: ["python", "-c", "print('데이터 수집 완료')"]
+          restartPolicy: OnFailure

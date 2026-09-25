@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: policy-params
+  namespace: core
+data:
+  reward_rate_env: "0.05"
+  sme_bonus_rate: "0.10"
+  anomaly_threshold: "0.15"
+  monthly_issue_cap: "10000"
+  policy_status: "ACTIVE"

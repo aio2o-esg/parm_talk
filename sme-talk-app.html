@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SME-TALK | ESG-Gold Platform</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&family=Rajdhani:wght@500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+  :root {
+    --gold: #C9A84C;
+    --gold-light: #F5D98A;
+    --gold-dark: #A07830;
+    --bg: #0D1117;
+    --surface: #161B22;
+    --surface-light: #21262D;
+    --env: #2D6A4F;
+    --soc: #1D6A9A;
+    --gov: #7B2D8B;
+    --text: #E6EDF3;
+    --text-muted: #8B949E;
+    --text-dim: #484F58;
+    --success: #3FB950;
+    --warning: #D29922;
+    --danger: #F85149;
+    --info: #58A6FF;
+    --border: #30363D;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: #060A0F;
+    font-family: 'Noto Sans KR', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* 폰 껍데기 */
+  .phone-frame {
+    width: 375px;
+    height: 780px;
+    background: var(--bg);
+    border-radius: 48px;
+    border: 2px solid #2A2A3A;
+    overflow: hidden;
+    position: relative;
+    box-shadow:
+      0 0 0 6px #111118,
+      0 0 0 8px #1A1A24,
+      0 40px 80px rgba(0,0,0,0.8),
+      0 0 60px rgba(201,168,76,0.06);
+  }
+
+  /* 노치 */
+  .phone-frame::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 120px; height: 28px;
+    background: #111118;
+    border-radius: 0 0 20px 20px;
+    z-index: 100;
+  }
+
+  /* 화면 컨테이너 */
+  .screen-container {
+    width: 100%; height: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* 개별 화면 */
+  .screen {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+  }
+  .screen.active {
+    transform: translateX(0);
+  }
+  .screen.exit-left {
+    transform: translateX(-30%);
+  }
+
+  /* 스크롤 영역 */
+  .scroll-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .scroll-content::-webkit-scrollbar { display: none; }
+
+  /* ========== 공통 컴포넌트 ========== */
+
+  .status-bar {
+    height: 32px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    padding: 0 20px 4px;
+    font-size: 10px;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    flex-shrink: 0;
+  }
+
+  .bottom-nav {
+    display: flex;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 8px 0 20px;
+    flex-shrink: 0;
+  }
+  .nav-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    cursor: pointer;
+    padding: 4px 0;
+    transition: transform 0.1s;
+  }
+  .nav-tab:active { transform: scale(0.9); }
+  .nav-icon { font-size: 20px; }
+  .nav-label { font-size: 9px; color: var(--text-muted); }
+  .nav-label.active { color: var(--gold); font-weight: 700; }
+  .nav-dot { width: 4px; height: 4px; background: var(--gold); border-radius: 50%; margin: 1px auto 0; }
+
+  .section-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+  .section-title { font-size: 12px; color: var(--gold); font-weight: 700; margin-bottom: 12px; letter-spacing: 0.5px; }
+
+  .esg-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .esg-label { font-size: 11px; color: var(--text-muted); font-weight: 700; width: 14px; }
+  .esg-track { flex: 1; height: 7px; background: var(--surface-light); border-radius: 4px; overflow: hidden; }
+  .esg-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease; }
+  .esg-val { font-size: 11px; color: var(--text); width: 24px; text-align: right; font-family: 'JetBrains Mono', monospace; }
+
+  /* ========== 화면 01: 스플래시 ========== */
+  #screen-splash {
+    background: linear-gradient(160deg, #0D1117 0%, #111820 60%, #0D1117 100%);
+    align-items: center;
+    justify-content: center;
+    padding: 60px 28px 40px;
+    gap: 0;
+  }
+  #screen-splash::after {
+    content: '';
+    position: absolute;
+    top: 60px; left: 50%; transform: translateX(-50%);
+    width: 260px; height: 260px;
+    background: radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .splash-logo { font-family: 'Rajdhani', sans-serif; font-size: 44px; font-weight: 700; color: var(--gold); letter-spacing: 4px; text-align: center; margin-bottom: 4px; }
+  .splash-sub { font-size: 11px; color: var(--text-muted); letter-spacing: 2px; text-align: center; margin-bottom: 20px; }
+  .splash-badges { display: flex; gap: 8px; margin-bottom: 24px; }
+  .badge { padding: 5px 12px; border-radius: 20px; font-size: 10px; font-weight: 700; }
+  .badge-e { background: var(--env); color: #fff; }
+  .badge-s { background: var(--soc); color: #fff; }
+  .badge-g { background: var(--gov); color: #fff; }
+
+  .splash-issued { text-align: center; margin-bottom: 32px; }
+  .splash-issued-label { font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
+  .splash-issued-value { font-family: 'JetBrains Mono', monospace; font-size: 26px; color: var(--gold-light); font-weight: 600; }
+  .splash-issued-sub { font-size: 10px; color: var(--text-dim); margin-top: 4px; }
+
+  .login-form { width: 100%; display: flex; flex-direction: column; gap: 10px; }
+  .login-input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 13px 16px;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-family: 'Noto Sans KR', sans-serif;
+    width: 100%;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .login-input:focus { border-color: var(--gold); }
+  .login-btn {
+    background: linear-gradient(135deg, var(--gold-dark), var(--gold));
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    color: var(--bg);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: opacity 0.2s, transform 0.1s;
+    margin-top: 4px;
+  }
+  .login-btn:active { opacity: 0.85; transform: scale(0.98); }
+  .wallet-btn {
+    background: transparent;
+    border: 1px solid var(--gold);
+    border-radius: 12px;
+    padding: 12px;
+    color: var(--gold);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    transition: background 0.2s;
+  }
+  .wallet-btn:active { background: rgba(201,168,76,0.1); }
+  .login-links { display: flex; justify-content: center; gap: 20px; }
+  .login-link { font-size: 11px; color: var(--text-muted); cursor: pointer; }
+
+  /* ========== 화면 02: 홈 ========== */
+  .home-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .home-greeting { font-size: 12px; color: var(--text-muted); }
+  .home-username { font-size: 20px; font-weight: 700; color: var(--text); margin-top: 2px; }
+  .home-bell { font-size: 22px; cursor: pointer; }
+
+  .gold-card {
+    background: linear-gradient(135deg, var(--surface-light) 0%, #1A2030 100%);
+    border: 1px solid var(--gold-dark);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .gold-card::before {
+    content: '';
+    position: absolute; top: -40px; right: -40px;
+    width: 140px; height: 140px;
+    background: radial-gradient(circle, rgba(201,168,76,0.1) 0%, transparent 70%);
+  }
+  .gold-card-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+  .gold-card-title { font-size: 12px; color: var(--gold); font-weight: 700; }
+  .gold-card-asa { font-size: 9px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; }
+  .gold-balance { text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 38px; font-weight: 600; color: var(--gold-light); padding: 6px 0; }
+  .gold-unit { text-align: center; font-size: 12px; color: var(--text-muted); margin-bottom: 16px; }
+  .gold-btns { display: flex; justify-content: space-around; }
+  .gold-btn { display: flex; flex-direction: column; align-items: center; gap: 4px; background: var(--surface); border-radius: 12px; padding: 10px 20px; cursor: pointer; transition: background 0.2s; }
+  .gold-btn:active { background: var(--surface-light); }
+  .gold-btn-icon { font-size: 16px; }
+  .gold-btn-label { font-size: 10px; color: var(--text-muted); }
+
+  .alert-banner {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--surface-light);
+    border-left: 3px solid var(--gold);
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    cursor: pointer;
+  }
+  .alert-text { font-size: 11px; color: var(--text); flex: 1; line-height: 1.5; }
+
+  .activity-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .activity-item:last-child { border-bottom: none; }
+  .act-type { font-size: 10px; color: var(--gold); font-weight: 700; }
+  .act-desc { font-size: 12px; color: var(--text); margin: 2px 0; }
+  .act-time { font-size: 10px; color: var(--text-muted); }
+  .act-reward { font-size: 12px; color: var(--success); font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+
+  /* ========== 화면 03: ESG 활동 인증 ========== */
+  .screen-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 20px 12px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .back-btn { font-size: 20px; cursor: pointer; color: var(--gold); padding: 4px; }
+  .screen-header-title { font-size: 16px; font-weight: 700; color: var(--text); }
+
+  .tab-bar { display: flex; background: var(--surface); padding: 0 12px; gap: 0; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+  .tab-item { flex: 1; text-align: center; padding: 10px 0; font-size: 10px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+  .tab-item.tab-active-e { color: #4ADE80; border-bottom-color: #4ADE80; }
+
+  .activity-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 12px; }
+  .activity-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .activity-card-name { font-size: 13px; font-weight: 700; color: var(--text); }
+  .activity-card-reward { font-size: 11px; color: var(--gold); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+  .activity-card-desc { font-size: 11px; color: var(--text-muted); margin-bottom: 10px; line-height: 1.5; }
+  .progress-bar-track { height: 5px; background: var(--surface-light); border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
+  .progress-bar-fill { height: 100%; border-radius: 4px; }
+  .progress-text { font-size: 10px; color: var(--text-dim); margin-bottom: 10px; }
+  .verify-btn { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, var(--gold-dark), var(--gold)); border: none; border-radius: 10px; padding: 8px 16px; color: var(--bg); font-size: 11px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; transition: opacity 0.2s; }
+  .verify-btn:active { opacity: 0.8; }
+
+  /* ========== 화면 04: 지갑 ========== */
+  .wallet-addr-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 8px 14px; font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted); text-align: center; margin-bottom: 14px; cursor: pointer; }
+
+  .wallet-total { text-align: center; background: linear-gradient(135deg, var(--surface-light), #1A2030); border: 1px solid var(--gold-dark); border-radius: 20px; padding: 20px; margin-bottom: 14px; }
+  .wallet-total-label { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+  .wallet-total-value { font-family: 'JetBrains Mono', monospace; font-size: 32px; font-weight: 600; color: var(--gold-light); }
+  .wallet-total-unit { font-size: 14px; color: var(--text-muted); }
+  .wallet-total-krw { font-size: 12px; color: var(--text-dim); margin-top: 6px; }
+
+  .wallet-quick-btns { display: flex; justify-content: space-around; margin-bottom: 14px; }
+  .wallet-quick-btn { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+  .wallet-quick-icon { width: 48px; height: 48px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: background 0.2s; }
+  .wallet-quick-icon:active { background: var(--surface-light); }
+  .wallet-quick-label { font-size: 10px; color: var(--text-muted); }
+
+  .asa-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .asa-item:last-child { border-bottom: none; }
+  .asa-name { font-size: 13px; color: var(--text); font-weight: 600; }
+  .asa-id { font-size: 9px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; margin-top: 2px; }
+  .asa-amount { font-size: 13px; color: var(--gold); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+  .asa-krw { font-size: 10px; color: var(--text-muted); text-align: right; margin-top: 2px; }
+
+  .tx-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .tx-item:last-child { border-bottom: none; }
+  .tx-type { font-size: 11px; color: var(--text); font-weight: 600; }
+  .tx-hash { font-size: 9px; color: var(--info); font-family: 'JetBrains Mono', monospace; margin: 2px 0; cursor: pointer; }
+  .tx-time { font-size: 9px; color: var(--text-dim); }
+  .tx-pos { font-size: 13px; color: var(--success); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+  .tx-neg { font-size: 13px; color: var(--danger); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+
+  /* ========== 화면 05: AI 정책 ========== */
+  .policy-badge { display: inline-flex; align-items: center; gap: 6px; background: rgba(201,168,76,0.12); border: 1px solid var(--gold-dark); border-radius: 20px; padding: 5px 12px; font-size: 10px; color: var(--gold); font-weight: 700; margin-bottom: 8px; }
+
+  .cycle-diagram { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+  .cycle-title { font-size: 11px; color: var(--gold); font-weight: 700; margin-bottom: 12px; }
+  .cycle-steps { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .cycle-step { background: var(--surface-light); border-radius: 10px; padding: 10px 12px; display: flex; align-items: center; gap: 8px; }
+  .cycle-step.cs-active { border: 1px solid var(--gold); background: rgba(201,168,76,0.08); }
+  .cycle-num { width: 22px; height: 22px; background: var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--text-muted); flex-shrink: 0; }
+  .cycle-num.cn-active { background: var(--gold); color: var(--bg); }
+  .cycle-text { font-size: 10px; color: var(--text-muted); line-height: 1.4; }
+  .cycle-text.ct-active { color: var(--text); }
+
+  .param-item { margin-bottom: 10px; }
+  .param-header { display: flex; justify-content: space-between; margin-bottom: 5px; }
+  .param-name { font-size: 11px; color: var(--text-muted); }
+  .param-value { font-size: 11px; color: var(--gold); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+  .param-track { height: 6px; background: var(--surface-light); border-radius: 4px; overflow: hidden; }
+  .param-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--gold-dark), var(--gold)); }
+
+  .ai-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+  .ai-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+  .ai-card-label { font-size: 10px; color: var(--text-muted); margin-bottom: 4px; }
+  .ai-card-value { font-size: 18px; font-weight: 700; color: var(--text); font-family: 'JetBrains Mono', monospace; }
+  .ai-card-change { font-size: 10px; color: var(--success); margin-top: 2px; }
+  .ai-card-change.neg { color: var(--danger); }
+
+  /* ========== 화면 06: 마이페이지 ========== */
+  .profile-card { background: linear-gradient(135deg, var(--surface-light), #1A2030); border: 1px solid var(--gold-dark); border-radius: 20px; padding: 18px; margin-bottom: 14px; display: flex; align-items: center; gap: 16px; }
+  .profile-avatar { width: 58px; height: 58px; background: linear-gradient(135deg, var(--gold-dark), var(--gold)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; flex-shrink: 0; }
+  .profile-name { font-size: 18px; font-weight: 700; color: var(--text); }
+  .profile-type { display: inline-block; background: rgba(201,168,76,0.15); border: 1px solid var(--gold-dark); border-radius: 10px; padding: 2px 10px; font-size: 10px; color: var(--gold); font-weight: 700; margin: 4px 0; }
+  .profile-region { font-size: 11px; color: var(--text-muted); }
+
+  .stats-row { display: flex; gap: 10px; margin-bottom: 14px; }
+  .stat-card { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px 8px; text-align: center; }
+  .stat-value { font-size: 18px; font-weight: 700; color: var(--gold); font-family: 'JetBrains Mono', monospace; }
+  .stat-label { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
+
+  .grade-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, var(--env), #3A7D5E); border-radius: 20px; padding: 5px 14px; font-size: 12px; font-weight: 700; color: #fff; margin-bottom: 12px; }
+
+  .menu-item { display: flex; justify-content: space-between; align-items: center; padding: 13px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.1s; }
+  .menu-item:last-child { border-bottom: none; }
+  .menu-item:active { opacity: 0.7; }
+  .menu-left { display: flex; align-items: center; gap: 12px; }
+  .menu-icon { font-size: 16px; width: 22px; text-align: center; }
+  .menu-text { font-size: 13px; color: var(--text); }
+  .menu-arrow { font-size: 14px; color: var(--text-dim); }
+
+  .logout-btn { width: 100%; background: transparent; border: 1px solid var(--danger); border-radius: 12px; padding: 12px; color: var(--danger); font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Noto Sans KR', sans-serif; margin-bottom: 20px; transition: background 0.2s; }
+  .logout-btn:active { background: rgba(248,81,73,0.1); }
+
+  /* 토스트 알림 */
+  .toast {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface-light);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 12px;
+    color: var(--text);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 999;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+  .toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+  <div class="screen-container">
+
+    <!-- ===== 화면 01: 스플래시/로그인 ===== -->
+    <div class="screen active" id="screen-splash">
+      <div class="status-bar" style="height:36px"></div>
+      <div class="splash-logo">🌿 SME-TALK</div>
+      <div class="splash-sub">ESG-Gold Platform · Algorand</div>
+      <div class="splash-badges">
+        <div class="badge badge-e">Environmental</div>
+        <div class="badge badge-s">Social</div>
+        <div class="badge badge-g">Governance</div>
+      </div>
+      <div class="splash-issued">
+        <div class="splash-issued-label">총 발행 ESG-Gold</div>
+        <div class="splash-issued-value">1,250,000</div>
+        <div class="splash-issued-sub">ESGG · ASA ID: 758116412</div>
+      </div>
+      <div class="login-form">
+        <input class="login-input" type="email" placeholder="📧 이메일 또는 사업자번호">
+        <input class="login-input" type="password" placeholder="🔒 비밀번호">
+        <button class="login-btn" onclick="goTo('home')">로그인</button>
+        <button class="wallet-btn" onclick="goTo('home')">🔗 Algorand 지갑 연결 (WalletConnect)</button>
+        <div class="login-links">
+          <span class="login-link">회원가입</span>
+          <span class="login-link">비밀번호 찾기</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== 화면 02: 홈 대시보드 ===== -->
+    <div class="screen" id="screen-home">
+      <div class="status-bar"><span>9:41</span><span>🔋</span></div>
+      <div class="scroll-content" style="padding: 0 20px 8px;">
+        <div class="home-header">
+          <div>
+            <div class="home-greeting">안녕하세요 👋</div>
+            <div class="home-username">성보경 관리자</div>
+          </div>
+          <div class="home-bell" onclick="showToast('새 알림이 없습니다')">🔔</div>
+        </div>
+
+        <div class="gold-card">
+          <div class="gold-card-header">
+            <div class="gold-card-title">ESG-Gold 잔액</div>
+            <div class="gold-card-asa">ASA: 758116412</div>
+          </div>
+          <div class="gold-balance">3,250</div>
+          <div class="gold-unit">ESGG</div>
+          <div class="gold-btns">
+            <div class="gold-btn" onclick="goTo('wallet')"><div class="gold-btn-icon">📤</div><div class="gold-btn-label">보내기</div></div>
+            <div class="gold-btn" onclick="goTo('wallet')"><div class="gold-btn-icon">📥</div><div class="gold-btn-label">받기</div></div>
+            <div class="gold-btn" onclick="goTo('wallet')"><div class="gold-btn-icon">🔄</div><div class="gold-btn-label">교환</div></div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-title">ESG 활동 점수</div>
+          <div class="esg-row"><div class="esg-label">E</div><div class="esg-track"><div class="esg-fill" style="width:72%;background:var(--env)"></div></div><div class="esg-val">72</div></div>
+          <div class="esg-row"><div class="esg-label">S</div><div class="esg-track"><div class="esg-fill" style="width:65%;background:var(--soc)"></div></div><div class="esg-val">65</div></div>
+          <div class="esg-row"><div class="esg-label">G</div><div class="esg-track"><div class="esg-fill" style="width:58%;background:var(--gov)"></div></div><div class="esg-val">58</div></div>
+        </div>
+
+        <div class="alert-banner" onclick="goTo('policy')">
+          <span>📢</span>
+          <div class="alert-text">이번 주 환경 활동 보상 <strong style="color:var(--gold)">1.2배</strong> 상향 적용 중 → 정책 확인</div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-title">최근 활동</div>
+          <div class="activity-item" onclick="goTo('activity')">
+            <div><div class="act-type">🌱 환경</div><div class="act-desc">다회용컵 사용 인증</div><div class="act-time">오늘 14:32</div></div>
+            <div class="act-reward">+50 ESGG</div>
+          </div>
+          <div class="activity-item" onclick="goTo('activity')">
+            <div><div class="act-type">🚲 사회</div><div class="act-desc">자전거 이동 3.2km</div><div class="act-time">오늘 09:15</div></div>
+            <div class="act-reward">+32 ESGG</div>
+          </div>
+          <div class="activity-item" onclick="goTo('activity')">
+            <div><div class="act-type">🌱 환경</div><div class="act-desc">분리수거 인증</div><div class="act-time">어제 17:44</div></div>
+            <div class="act-reward">+30 ESGG</div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-tab" onclick="goTo('home')"><div class="nav-icon">🏠</div><div class="nav-label active">홈</div><div class="nav-dot"></div></div>
+        <div class="nav-tab" onclick="goTo('activity')"><div class="nav-icon">🌱</div><div class="nav-label">활동</div></div>
+        <div class="nav-tab" onclick="goTo('wallet')"><div class="nav-icon">💰</div><div class="nav-label">지갑</div></div>
+        <div class="nav-tab" onclick="goTo('policy')"><div class="nav-icon">📋</div><div class="nav-label">정책</div></div>
+        <div class="nav-tab" onclick="goTo('mypage')"><div class="nav-icon">👤</div><div class="nav-label">마이</div></div>
+      </div>
+    </div>
+
+    <!-- ===== 화면 03: ESG 활동 인증 ===== -->
+    <div class="screen" id="screen-activity">
+      <div class="status-bar"><span>9:41</span><span>🔋</span></div>
+      <div class="screen-header">
+        <div class="back-btn" onclick="goTo('home')">‹</div>
+        <div class="screen-header-title">ESG 활동 인증</div>
+      </div>
+      <div class="tab-bar">
+        <div class="tab-item tab-active-e">🌿 환경(E)</div>
+        <div class="tab-item" style="color:var(--text-muted)">🤝 사회(S)</div>
+        <div class="tab-item" style="color:var(--text-muted)">🏛 거버넌스</div>
+        <div class="tab-item" style="color:var(--text-muted)">전체</div>
+      </div>
+      <div class="scroll-content" style="padding:14px 20px 8px;">
+        <div class="activity-card">
+          <div class="activity-card-header">
+            <div class="activity-card-name">🛍 다회용컵 사용 인증</div>
+            <div class="activity-card-reward">+50 ESGG</div>
+          </div>
+          <div class="activity-card-desc">소상공인 매장 QR 스캔으로 친환경 컵 사용을 인증합니다.</div>
+          <div class="progress-bar-track"><div class="progress-bar-fill" style="width:68%;background:var(--env)"></div></div>
+          <div class="progress-text">이번 달 17/25회 달성</div>
+          <button class="verify-btn" onclick="showToast('📷 QR 카메라 실행 중...')">📷 QR 스캔 인증</button>
+        </div>
+        <div class="activity-card">
+          <div class="activity-card-header">
+            <div class="activity-card-name">🚴 자전거·도보 이동</div>
+            <div class="activity-card-reward">+10 ESGG/km</div>
+          </div>
+          <div class="activity-card-desc">GPS 자동 추적으로 친환경 이동 수단 사용을 인증합니다.</div>
+          <div class="progress-bar-track"><div class="progress-bar-fill" style="width:45%;background:var(--soc)"></div></div>
+          <div class="progress-text">이번 달 45.2km / 100km</div>
+          <button class="verify-btn" style="background:linear-gradient(135deg,#1D6A9A,#2D8AC0)" onclick="showToast('📍 GPS 추적 시작됨')">📍 GPS 인증 시작</button>
+        </div>
+        <div class="activity-card">
+          <div class="activity-card-header">
+            <div class="activity-card-name">⚡ 에너지 절약 인증</div>
+            <div class="activity-card-reward">+200 ESGG</div>
+          </div>
+          <div class="activity-card-desc">전월 대비 전력·가스 사용량 감축 시 자동 지급됩니다.</div>
+          <div class="progress-bar-track"><div class="progress-bar-fill" style="width:82%;background:var(--gov)"></div></div>
+          <div class="progress-text">절감률 8.2% (목표 10%)</div>
+          <button class="verify-btn" style="background:linear-gradient(135deg,#7B2D8B,#9B4DAB)" onclick="showToast('🔌 스마트미터 연동 확인 중...')">🔌 자동 연동 확인</button>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-tab" onclick="goTo('home')"><div class="nav-icon">🏠</div><div class="nav-label">홈</div></div>
+        <div class="nav-tab" onclick="goTo('activity')"><div class="nav-icon">🌱</div><div class="nav-label active">활동</div><div class="nav-dot"></div></div>
+        <div class="nav-tab" onclick="goTo('wallet')"><div class="nav-icon">💰</div><div class="nav-label">지갑</div></div>
+        <div class="nav-tab" onclick="goTo('policy')"><div class="nav-icon">📋</div><div class="nav-label">정책</div></div>
+        <div class="nav-tab" onclick="goTo('mypage')"><div class="nav-icon">👤</div><div class="nav-label">마이</div></div>
+      </div>
+    </div>
+
+    <!-- ===== 화면 04: 지갑 ===== -->
+    <div class="screen" id="screen-wallet">
+      <div class="status-bar"><span>9:41</span><span>🔋</span></div>
+      <div class="screen-header">
+        <div class="back-btn" onclick="goTo('home')">‹</div>
+        <div class="screen-header-title">Algorand 지갑</div>
+      </div>
+      <div class="scroll-content" style="padding:14px 20px 8px;">
+        <div class="wallet-addr-box" onclick="showToast('주소가 복사되었습니다')">
+          XNAFLAPPIQPRY2S5YHDYTR3UPNQXZYDV4PSKOMYRTH6LZMPPSUKRWAREPU
+        </div>
+        <div class="wallet-total">
+          <div class="wallet-total-label">총 자산</div>
+          <div class="wallet-total-value">3,250 <span class="wallet-total-unit">ESGG</span></div>
+          <div class="wallet-total-krw">≈ ₩ 162,500</div>
+        </div>
+        <div class="wallet-quick-btns">
+          <div class="wallet-quick-btn" onclick="showToast('보내기 기능')"><div class="wallet-quick-icon">📤</div><div class="wallet-quick-label">보내기</div></div>
+          <div class="wallet-quick-btn" onclick="showToast('받기 QR 생성')"><div class="wallet-quick-icon">📥</div><div class="wallet-quick-label">받기</div></div>
+          <div class="wallet-quick-btn" onclick="showToast('교환 기능')"><div class="wallet-quick-icon">🔄</div><div class="wallet-quick-label">교환</div></div>
+          <div class="wallet-quick-btn"><div class="wallet-quick-icon">📊</div><div class="wallet-quick-label">내역</div></div>
+        </div>
+        <div class="section-card">
+          <div class="section-title">보유 ASA 자산</div>
+          <div class="asa-item">
+            <div><div class="asa-name">🏅 ESG-Gold (ESGG)</div><div class="asa-id">ASA: 758116412</div></div>
+            <div style="text-align:right"><div class="asa-amount">3,250</div><div class="asa-krw">₩162,500</div></div>
+          </div>
+          <div class="asa-item">
+            <div><div class="asa-name">🌿 Green Point (GP)</div><div class="asa-id">ASA: 758116413</div></div>
+            <div style="text-align:right"><div class="asa-amount">840</div><div class="asa-krw">₩42,000</div></div>
+          </div>
+          <div class="asa-item">
+            <div><div class="asa-name">◎ ALGO</div><div class="asa-id">Algorand 기본 통화</div></div>
+            <div style="text-align:right"><div class="asa-amount">5.82</div><div class="asa-krw">₩8,730</div></div>
+          </div>
+        </div>
+        <div class="section-card">
+          <div class="section-title">온체인 거래 내역</div>
+          <div class="tx-item">
+            <div><div class="tx-type">ESG-Gold 수령</div><div class="tx-hash" onclick="showToast('AlgoExplorer에서 확인 중...')">TX: A3F9...8B2C ↗</div><div class="tx-time">2026-04-07 14:32</div></div>
+            <div class="tx-pos">+50</div>
+          </div>
+          <div class="tx-item">
+            <div><div class="tx-type">ESG-Gold 수령</div><div class="tx-hash" onclick="showToast('AlgoExplorer에서 확인 중...')">TX: C7D2...1E4A ↗</div><div class="tx-time">2026-04-07 09:15</div></div>
+            <div class="tx-pos">+32</div>
+          </div>
+          <div class="tx-item">
+            <div><div class="tx-type">쿠폰 교환</div><div class="tx-hash" onclick="showToast('AlgoExplorer에서 확인 중...')">TX: F1B8...9D3E ↗</div><div class="tx-time">2026-04-06 17:44</div></div>
+            <div class="tx-neg">-100</div>
+          </div>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-tab" onclick="goTo('home')"><div class="nav-icon">🏠</div><div class="nav-label">홈</div></div>
+        <div class="nav-tab" onclick="goTo('activity')"><div class="nav-icon">🌱</div><div class="nav-label">활동</div></div>
+        <div class="nav-tab" onclick="goTo('wallet')"><div class="nav-icon">💰</div><div class="nav-label active">지갑</div><div class="nav-dot"></div></div>
+        <div class="nav-tab" onclick="goTo('policy')"><div class="nav-icon">📋</div><div class="nav-label">정책</div></div>
+        <div class="nav-tab" onclick="goTo('mypage')"><div class="nav-icon">👤</div><div class="nav-label">마이</div></div>
+      </div>
+    </div>
+
+    <!-- ===== 화면 05: AI 정책 대시보드 ===== -->
+    <div class="screen" id="screen-policy">
+      <div class="status-bar"><span>9:41</span><span>🔋</span></div>
+      <div class="screen-header">
+        <div class="back-btn" onclick="goTo('home')">‹</div>
+        <div class="screen-header-title">AI 정책 대시보드</div>
+      </div>
+      <div class="scroll-content" style="padding:14px 20px 8px;">
+        <div class="policy-badge">⚙️ AI Policy Engine · 실시간</div>
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">정책 환류 현황</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:14px;">AI 분석 기반 실시간 정책 조정 중</div>
+
+        <div class="cycle-diagram">
+          <div class="cycle-title">📊 정책 환류 사이클</div>
+          <div class="cycle-steps">
+            <div class="cycle-step"><div class="cycle-num" style="background:var(--success);color:#fff">✓</div><div class="cycle-text">데이터 수집<br><span style="font-size:9px;color:var(--success)">완료</span></div></div>
+            <div class="cycle-step cs-active"><div class="cycle-num cn-active">2</div><div class="cycle-text ct-active">AI 분석<br><span style="font-size:9px;color:var(--gold)">진행 중</span></div></div>
+            <div class="cycle-step"><div class="cycle-num">3</div><div class="cycle-text">정책 판단<br><span style="font-size:9px;">대기</span></div></div>
+            <div class="cycle-step"><div class="cycle-num">4</div><div class="cycle-text">온체인 실행<br><span style="font-size:9px;">대기</span></div></div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-title">현재 정책 파라미터 (ConfigMap)</div>
+          <div class="param-item">
+            <div class="param-header"><span class="param-name">환경활동 보상배율</span><span class="param-value">0.07</span></div>
+            <div class="param-track"><div class="param-fill" style="width:70%"></div></div>
+          </div>
+          <div class="param-item">
+            <div class="param-header"><span class="param-name">소상공인 우대보너스</span><span class="param-value">0.10</span></div>
+            <div class="param-track"><div class="param-fill" style="width:50%"></div></div>
+          </div>
+          <div class="param-item">
+            <div class="param-header"><span class="param-name">이상행위 임계값</span><span class="param-value">0.15</span></div>
+            <div class="param-track"><div class="param-fill" style="width:30%"></div></div>
+          </div>
+          <div class="param-item">
+            <div class="param-header"><span class="param-name">월 발행 한도</span><span class="param-value">10,000 ESGG</span></div>
+            <div class="param-track"><div class="param-fill" style="width:60%"></div></div>
+          </div>
+        </div>
+
+        <div class="ai-grid">
+          <div class="ai-card"><div class="ai-card-label">참여율 변화</div><div class="ai-card-value">+12%</div><div class="ai-card-change">▲ 전월 대비</div></div>
+          <div class="ai-card"><div class="ai-card-label">이상행위 건수</div><div class="ai-card-value">3건</div><div class="ai-card-change neg">차단 완료</div></div>
+          <div class="ai-card"><div class="ai-card-label">예측 발행량</div><div class="ai-card-value">8,240</div><div class="ai-card-change">ESGG</div></div>
+          <div class="ai-card"><div class="ai-card-label">정책 효과 점수</div><div class="ai-card-value">87.3</div><div class="ai-card-change">▲ 우수</div></div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-title">파라미터 변경 승인 (관리자)</div>
+          <button class="verify-btn" style="width:100%;justify-content:center;margin-bottom:8px" onclick="showToast('✅ reward_rate_env 0.07 → 0.08 적용 완료')">⚡ 보상배율 상향 적용</button>
+          <button class="verify-btn" style="width:100%;justify-content:center;background:linear-gradient(135deg,#1D6A9A,#2D8AC0)" onclick="showToast('🔄 Rolling Update 실행 중...')">🔄 Rolling Update 실행</button>
+        </div>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-tab" onclick="goTo('home')"><div class="nav-icon">🏠</div><div class="nav-label">홈</div></div>
+        <div class="nav-tab" onclick="goTo('activity')"><div class="nav-icon">🌱</div><div class="nav-label">활동</div></div>
+        <div class="nav-tab" onclick="goTo('wallet')"><div class="nav-icon">💰</div><div class="nav-label">지갑</div></div>
+        <div class="nav-tab" onclick="goTo('policy')"><div class="nav-icon">📋</div><div class="nav-label active">정책</div><div class="nav-dot"></div></div>
+        <div class="nav-tab" onclick="goTo('mypage')"><div class="nav-icon">👤</div><div class="nav-label">마이</div></div>
+      </div>
+    </div>
+
+    <!-- ===== 화면 06: 마이페이지 ===== -->
+    <div class="screen" id="screen-mypage">
+      <div class="status-bar"><span>9:41</span><span>🔋</span></div>
+      <div class="scroll-content" style="padding:8px 20px 8px;">
+        <div class="profile-card">
+          <div class="profile-avatar">👤</div>
+          <div>
+            <div class="profile-name">성보경</div>
+            <div class="profile-type">지자체 관리자</div>
+            <div class="profile-region">📍 서울특별시</div>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card"><div class="stat-value">3,250</div><div class="stat-label">ESG-Gold</div></div>
+          <div class="stat-card"><div class="stat-value">142</div><div class="stat-label">인증 횟수</div></div>
+          <div class="stat-card"><div class="stat-value">A+</div><div class="stat-label">ESG 등급</div></div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-title">ESG 점수 세부 현황</div>
+          <div class="grade-badge">🏆 A+ 등급</div>
+          <div class="esg-row"><div class="esg-label">E</div><div class="esg-track"><div class="esg-fill" style="width:72%;background:var(--env)"></div></div><div class="esg-val">72</div></div>
+          <div class="esg-row"><div class="esg-label">S</div><div class="esg-track"><div class="esg-fill" style="width:65%;background:var(--soc)"></div></div><div class="esg-val">65</div></div>
+          <div class="esg-row"><div class="esg-label">G</div><div class="esg-track"><div class="esg-fill" style="width:58%;background:var(--gov)"></div></div><div class="esg-val">58</div></div>
+        </div>
+
+        <div class="section-card">
+          <div class="menu-item" onclick="showToast('Algorand 지갑 관리')"><div class="menu-left"><span class="menu-icon">🔗</span><span class="menu-text">Algorand 지갑 관리</span></div><span class="menu-arrow">›</span></div>
+          <div class="menu-item" onclick="showToast('사업장 정보 수정')"><div class="menu-left"><span class="menu-icon">🏪</span><span class="menu-text">사업장 정보 수정</span></div><span class="menu-arrow">›</span></div>
+          <div class="menu-item" onclick="showToast('알림 설정')"><div class="menu-left"><span class="menu-icon">🔔</span><span class="menu-text">알림 설정</span></div><span class="menu-arrow">›</span></div>
+          <div class="menu-item" onclick="showToast('보안 설정')"><div class="menu-left"><span class="menu-icon">🔒</span><span class="menu-text">보안 / 개인정보</span></div><span class="menu-arrow">›</span></div>
+          <div class="menu-item" onclick="showToast('고객센터로 이동')"><div class="menu-left"><span class="menu-icon">❓</span><span class="menu-text">고객센터 / FAQ</span></div><span class="menu-arrow">›</span></div>
+        </div>
+
+        <button class="logout-btn" onclick="goTo('splash')">로그아웃</button>
+      </div>
+      <div class="bottom-nav">
+        <div class="nav-tab" onclick="goTo('home')"><div class="nav-icon">🏠</div><div class="nav-label">홈</div></div>
+        <div class="nav-tab" onclick="goTo('activity')"><div class="nav-icon">🌱</div><div class="nav-label">활동</div></div>
+        <div class="nav-tab" onclick="goTo('wallet')"><div class="nav-icon">💰</div><div class="nav-label">지갑</div></div>
+        <div class="nav-tab" onclick="goTo('policy')"><div class="nav-icon">📋</div><div class="nav-label">정책</div></div>
+        <div class="nav-tab" onclick="goTo('mypage')"><div class="nav-icon">👤</div><div class="nav-label active">마이</div><div class="nav-dot"></div></div>
+      </div>
+    </div>
+
+  </div><!-- /screen-container -->
+</div><!-- /phone-frame -->
+
+<!-- 토스트 -->
+<div class="toast" id="toast"></div>
+
+<script>
+  const screens = ['splash','home','activity','wallet','policy','mypage'];
+  let current = 'splash';
+
+  function goTo(id) {
+    if (id === current) return;
+    const prev = document.getElementById('screen-' + current);
+    const next = document.getElementById('screen-' + id);
+
+    prev.classList.add('exit-left');
+    next.classList.remove('exit-left');
+    next.classList.add('active');
+
+    setTimeout(() => {
+      prev.classList.remove('active', 'exit-left');
+    }, 350);
+
+    current = id;
+  }
+
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,2242 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a1628">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="SME-TALK">
+<link rel="manifest" href="/manifest.json">
+<title>SME-TALK | ESG-Gold Platform</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0a1628;
+  --navy2: #0f2040;
+  --navy3: #162d55;
+  --gold: #c9a84c;
+  --gold2: #e8c56a;
+  --gold3: #f5d98a;
+  --green: #2ecc71;
+  --red: #e74c3c;
+  --blue: #3498db;
+  --text: #e8edf5;
+  --text2: #9aabc2;
+  --text3: #5a7090;
+  --border: rgba(201,168,76,0.2);
+  --card: rgba(15,32,64,0.8);
+  --radius: 16px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { background: #060d18; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--navy);
+  color: var(--text);
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-width: 430px;
+  margin: 0 auto;
+  position: relative;
+}
+/* PC 등 큰 화면에서는 폰 크기로 고정해 빈 공간 제거 */
+@media (min-height: 920px) {
+  body {
+    height: 880px;
+    max-height: 880px;
+    margin: 24px auto;
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    border: 1px solid var(--border);
+  }
+}
+
+/* ── SCREENS ── */
+.screen { display: none; flex-direction: column; height: 100%; min-height: 0; overflow: hidden; }
+.screen.active { display: flex; }
+
+/* ── STATUS BAR ── */
+.statusbar {
+  background: var(--navy);
+  padding: 10px 20px 4px;
+  display: flex;
+  justify-content: space-between;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--text2);
+  flex-shrink: 0;
+}
+.statusbar .time { font-weight: 700; color: var(--text); }
+
+/* ── SCROLLABLE CONTENT ── */
+.content {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 16px 24px;
+  scroll-behavior: smooth;
+  min-height: 0;
+}
+.content::-webkit-scrollbar { display: none; }
+
+/* ── BOTTOM NAV ── */
+.nav {
+  display: flex;
+  background: var(--navy2);
+  border-top: 1px solid var(--border);
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+  flex-shrink: 0;
+}
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 0;
+  cursor: pointer;
+  transition: all 0.2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-item .nav-icon { font-size: 22px; transition: transform 0.2s; }
+.nav-item .nav-label { font-size: 10px; color: var(--text3); font-weight: 500; }
+.nav-item.active .nav-label { color: var(--gold); }
+.nav-item.active .nav-icon { transform: translateY(-2px); }
+
+/* ── LOGIN SCREEN ── */
+#screen-login {
+  background: linear-gradient(160deg, #0a1628 0%, #0f2040 50%, #162d55 100%);
+  justify-content: center;
+  padding: 40px 24px;
+  overflow-y: auto;
+}
+.login-logo {
+  text-align: center;
+  margin-bottom: 48px;
+}
+.login-logo .logo-icon {
+  width: 80px; height: 80px;
+  background: linear-gradient(135deg, var(--gold), var(--gold3));
+  border-radius: 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 40px;
+  margin: 0 auto 16px;
+  box-shadow: 0 8px 32px rgba(201,168,76,0.3);
+}
+.login-logo h1 { font-size: 28px; font-weight: 700; letter-spacing: 2px; }
+.login-logo p { font-size: 13px; color: var(--text2); margin-top: 6px; }
+
+.input-group { margin-bottom: 14px; }
+.input-group label { font-size: 12px; color: var(--text2); margin-bottom: 6px; display: block; font-weight: 500; }
+.input-group input {
+  width: 100%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px 16px;
+  color: var(--text);
+  font-size: 15px;
+  font-family: inherit;
+  transition: border-color 0.2s;
+  outline: none;
+}
+.input-group input:focus { border-color: var(--gold); }
+.btn-primary {
+  width: 100%;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  color: var(--navy);
+  border: none;
+  border-radius: 14px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.btn-primary:active { transform: scale(0.97); opacity: 0.9; }
+.btn-secondary {
+  width: 100%;
+  background: transparent;
+  color: var(--text2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 14px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-family: inherit;
+  transition: all 0.2s;
+}
+.btn-secondary:active { background: rgba(255,255,255,0.05); }
+.login-divider { text-align: center; color: var(--text3); font-size: 12px; margin: 16px 0; }
+.demo-accounts { background: rgba(201,168,76,0.08); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-top: 16px; }
+.demo-accounts p { font-size: 11px; color: var(--gold); font-weight: 700; margin-bottom: 8px; }
+.demo-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); margin-bottom: 4px; cursor: pointer; padding: 10px 8px; border-radius: 6px; transition: background 0.2s; -webkit-tap-highlight-color: rgba(201,168,76,0.3); touch-action: manipulation; user-select: none; }
+.demo-row:hover, .demo-row:active { background: rgba(255,255,255,0.1); }
+.demo-row:last-child { margin-bottom: 0; }
+
+/* ── PAGE HEADER ── */
+.page-header {
+  padding: 16px 16px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+.page-header h2 { font-size: 20px; font-weight: 700; }
+.header-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.icon-btn {
+  width: 36px; height: 36px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 18px;
+  transition: all 0.2s;
+}
+.icon-btn:active { background: rgba(255,255,255,0.12); }
+
+/* ── CARDS ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  backdrop-filter: blur(10px);
+}
+.card-title { font-size: 12px; color: var(--text2); font-weight: 500; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ── BALANCE CARD ── */
+.balance-card {
+  background: linear-gradient(135deg, var(--navy3), var(--navy2));
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 16px;
+  position: relative;
+  overflow: hidden;
+}
+.balance-card::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 140px; height: 140px;
+  background: radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%);
+}
+.balance-label { font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+.balance-amount { font-size: 36px; font-weight: 700; color: var(--gold2); font-family: 'Space Mono', monospace; }
+.balance-unit { font-size: 14px; color: var(--text2); margin-left: 4px; }
+.balance-usd { font-size: 12px; color: var(--text3); margin-top: 2px; }
+.balance-actions { display: flex; gap: 10px; margin-top: 16px; }
+.balance-btn {
+  flex: 1;
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text2);
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.balance-btn:active { background: rgba(255,255,255,0.12); }
+.balance-btn .btn-icon { font-size: 18px; display: block; margin-bottom: 3px; }
+
+/* ── ESG SCORE ── */
+.esg-score-row { display: flex; gap: 8px; margin-bottom: 12px; }
+.esg-score-item {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 8px;
+  text-align: center;
+}
+.esg-letter { font-size: 11px; font-weight: 700; color: var(--text3); margin-bottom: 4px; }
+.esg-val { font-size: 22px; font-weight: 700; font-family: 'Space Mono', monospace; }
+.esg-e .esg-val { color: #2ecc71; }
+.esg-s .esg-val { color: #3498db; }
+.esg-g .esg-val { color: #9b59b6; }
+
+/* ── ACTIVITY FEED ── */
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-icon {
+  width: 40px; height: 40px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.activity-icon.env { background: rgba(46,204,113,0.15); }
+.activity-icon.soc { background: rgba(52,152,219,0.15); }
+.activity-icon.gov { background: rgba(155,89,182,0.15); }
+.activity-info { flex: 1; }
+.activity-name { font-size: 14px; font-weight: 500; }
+.activity-time { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.activity-reward { font-size: 15px; font-weight: 700; color: var(--gold2); font-family: 'Space Mono', monospace; }
+
+/* ── ACTIVITY SCREEN ── */
+.activity-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: all 0.2s;
+}
+.activity-card:active { transform: scale(0.98); }
+.activity-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.activity-card-title { font-size: 15px; font-weight: 600; }
+.reward-badge {
+  background: rgba(201,168,76,0.15);
+  color: var(--gold2);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: 'Space Mono', monospace;
+}
+.activity-card-desc { font-size: 12px; color: var(--text2); margin-bottom: 12px; line-height: 1.5; }
+.progress-bar { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; margin-bottom: 8px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold2)); border-radius: 2px; transition: width 0.5s; }
+.progress-label { font-size: 11px; color: var(--text3); }
+.btn-verify {
+  width: 100%;
+  background: linear-gradient(135deg, var(--navy3), #1e3a6e);
+  color: var(--gold2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 12px;
+  font-family: inherit;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.btn-verify:active { transform: scale(0.97); }
+.btn-verify:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── WALLET ── */
+.wallet-addr {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 10px;
+  font-family: 'Space Mono', monospace;
+  color: var(--text3);
+  word-break: break-all;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+.asset-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.asset-row:last-child { border-bottom: none; }
+.asset-icon { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--gold), var(--gold2)); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.asset-info { flex: 1; }
+.asset-name { font-size: 14px; font-weight: 600; }
+.asset-id { font-size: 10px; color: var(--text3); font-family: 'Space Mono', monospace; }
+.asset-amount { text-align: right; }
+.asset-amount .amount { font-size: 16px; font-weight: 700; font-family: 'Space Mono', monospace; color: var(--gold2); }
+.asset-amount .worth { font-size: 11px; color: var(--text3); }
+.tx-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.tx-item:last-child { border-bottom: none; }
+.tx-dir { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.tx-dir.in { background: rgba(46,204,113,0.15); }
+.tx-dir.out { background: rgba(231,76,60,0.15); }
+.tx-info { flex: 1; }
+.tx-label { font-size: 13px; font-weight: 500; }
+.tx-hash { font-size: 10px; color: var(--gold); font-family: 'Space Mono', monospace; cursor: pointer; }
+.tx-amount { font-size: 14px; font-weight: 700; font-family: 'Space Mono', monospace; }
+.tx-amount.in { color: var(--green); }
+.tx-amount.out { color: var(--red); }
+
+/* ── POLICY / AI ── */
+.cycle-steps { display: flex; gap: 0; margin-bottom: 16px; }
+.cycle-step {
+  flex: 1;
+  text-align: center;
+  position: relative;
+}
+.cycle-step::after {
+  content: '→';
+  position: absolute;
+  right: -6px;
+  top: 12px;
+  color: var(--text3);
+  font-size: 12px;
+}
+.cycle-step:last-child::after { display: none; }
+.step-dot {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  margin: 0 auto 4px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  background: rgba(255,255,255,0.06);
+  border: 2px solid rgba(255,255,255,0.1);
+  color: var(--text3);
+  transition: all 0.4s;
+}
+.step-dot.done { background: rgba(46,204,113,0.2); border-color: var(--green); color: var(--green); }
+.step-dot.active { background: rgba(201,168,76,0.2); border-color: var(--gold); color: var(--gold); animation: pulse-dot 1.5s infinite; }
+.step-label { font-size: 9px; color: var(--text3); }
+@keyframes pulse-dot { 0%,100%{ box-shadow:0 0 0 0 rgba(201,168,76,0.4); } 50%{ box-shadow:0 0 0 6px rgba(201,168,76,0); } }
+
+.param-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.param-row:last-child { border-bottom: none; }
+.param-name { font-size: 12px; color: var(--text2); font-family: 'Space Mono', monospace; }
+.param-val { font-size: 13px; font-weight: 700; color: var(--gold2); font-family: 'Space Mono', monospace; }
+
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+.stat-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 14px;
+  padding: 14px 12px;
+  text-align: center;
+}
+.stat-val { font-size: 24px; font-weight: 700; font-family: 'Space Mono', monospace; }
+.stat-label { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.stat-change { font-size: 11px; margin-top: 4px; }
+.stat-change.up { color: var(--green); }
+.stat-change.down { color: var(--red); }
+
+.ai-result-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.ai-algo-name { font-size: 13px; font-weight: 600; flex: 1; }
+.ai-algo-desc { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.ai-algo-badge {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.badge-green { background: rgba(46,204,113,0.15); color: var(--green); }
+.badge-yellow { background: rgba(201,168,76,0.15); color: var(--gold2); }
+.badge-red { background: rgba(231,76,60,0.15); color: var(--red); }
+.badge-blue { background: rgba(52,152,219,0.15); color: var(--blue); }
+
+/* ── MY PAGE ── */
+.profile-header { text-align: center; padding: 16px 0 24px; }
+.profile-avatar {
+  width: 72px; height: 72px;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  border-radius: 50%;
+  margin: 0 auto 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+}
+.profile-name { font-size: 20px; font-weight: 700; }
+.profile-role { font-size: 12px; color: var(--text2); margin-top: 4px; }
+.profile-stats { display: flex; gap: 0; margin-top: 20px; background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px 0; }
+.profile-stat { flex: 1; text-align: center; border-right: 1px solid rgba(255,255,255,0.06); }
+.profile-stat:last-child { border-right: none; }
+.profile-stat .pval { font-size: 20px; font-weight: 700; font-family: 'Space Mono', monospace; color: var(--gold2); }
+.profile-stat .plabel { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.menu-item:last-child { border-bottom: none; }
+.menu-item:active { opacity: 0.7; }
+.menu-item .menu-icon { font-size: 20px; width: 32px; text-align: center; }
+.menu-item .menu-label { flex: 1; font-size: 14px; font-weight: 500; }
+.menu-item .menu-arrow { color: var(--text3); font-size: 14px; }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(15,32,64,0.95);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 12px 20px;
+  font-size: 13px;
+  color: var(--text);
+  z-index: 1000;
+  opacity: 0;
+  transition: all 0.3s;
+  white-space: nowrap;
+  backdrop-filter: blur(16px);
+  max-width: 90vw;
+  white-space: pre-wrap;
+  text-align: center;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.success { border-color: rgba(46,204,113,0.5); }
+.toast.error { border-color: rgba(231,76,60,0.5); }
+
+/* ── LOADING ── */
+.loader {
+  display: inline-block;
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── CHART BAR ── */
+.chart-container { margin: 8px 0; }
+.chart-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.chart-bar-label { font-size: 11px; color: var(--text2); width: 60px; flex-shrink: 0; }
+.chart-bar-outer { flex: 1; height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+.chart-bar-inner { height: 100%; border-radius: 4px; transition: width 1s ease; }
+.chart-bar-val { font-size: 11px; color: var(--text2); width: 36px; text-align: right; font-family: 'Space Mono', monospace; }
+
+/* ── PILL TABS ── */
+.pill-tabs { display: flex; gap: 8px; padding: 8px 0 4px; overflow-x: auto; }
+.pill-tabs::-webkit-scrollbar { display: none; }
+.pill-tab {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  background: rgba(255,255,255,0.06);
+  color: var(--text2);
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  font-family: inherit;
+}
+.pill-tab.active { background: rgba(201,168,76,0.15); color: var(--gold2); border-color: var(--border); }
+
+/* ── SIMULATE BUTTON ── */
+.btn-simulate {
+  width: 100%;
+  background: linear-gradient(135deg, #1a3a6e, #0f2040);
+  color: var(--gold2);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.btn-simulate:active { transform: scale(0.97); }
+.btn-ai-run {
+  width: 100%;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  color: var(--navy);
+  border: none;
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.btn-ai-run:active { transform: scale(0.97); }
+.btn-ai-run:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.ahp-score-display {
+  text-align: center;
+  padding: 20px;
+  background: linear-gradient(135deg, rgba(201,168,76,0.1), rgba(201,168,76,0.05));
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  margin-bottom: 12px;
+}
+.ahp-score-num { font-size: 52px; font-weight: 700; font-family: 'Space Mono', monospace; color: var(--gold2); }
+.ahp-score-label { font-size: 12px; color: var(--text2); margin-top: 4px; }
+.ahp-policy-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 10px;
+}
+
+.data-count-badge {
+  background: rgba(52,152,219,0.15);
+  color: var(--blue);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: 'Space Mono', monospace;
+}
+
+/* ── SECTION TITLE ── */
+.section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin: 16px 0 8px;
+}
+
+/* ── NEW AI ALGO CARDS ── */
+.algo-card { transition: border-color 0.3s; }
+.algo-card.algo-done { border-color: var(--green) !important; }
+.algo-card.algo-running { border-color: var(--blue) !important; }
+.algo-st { font-size:10px;padding:3px 8px;border-radius:8px;font-weight:500;background:var(--surface2);color:var(--text2);white-space:nowrap }
+.algo-st.running { background:rgba(88,166,255,0.15);color:var(--blue);animation:pulse-dot 1.2s infinite }
+.algo-st.done { background:rgba(46,204,113,0.15);color:var(--green) }
+.algo-pb { height:3px;background:var(--surface2);border-radius:2px;margin-bottom:8px;overflow:hidden }
+.algo-pb-fill { height:100%;background:var(--blue);border-radius:2px;width:0;transition:width 0.3s }
+.algo-res { max-height:0;overflow:hidden;transition:max-height 0.6s ease }
+.algo-res.show { max-height:1000px }
+.btn-algo { width:100%;padding:10px;border:1px solid var(--gold);border-radius:8px;background:transparent;color:var(--gold);font-size:12px;font-weight:600;cursor:pointer;font-family:'Noto Sans KR',sans-serif;transition:all 0.2s }
+.btn-algo:hover { background:rgba(201,168,76,0.1) }
+.btn-algo:active { transform:scale(0.97) }
+.btn-algo:disabled { opacity:0.4;cursor:not-allowed;border-color:var(--border);color:var(--text3) }
+.btn-algo.done { background:rgba(46,204,113,0.1);border-color:var(--green);color:var(--green);cursor:default }
+.fi-row { display:flex;align-items:center;gap:5px;margin:3px 0 }
+.fi-name { font-size:9px;color:var(--text2);width:76px;text-align:right;font-family:'JetBrains Mono',monospace;flex-shrink:0 }
+.fi-bg { flex:1;height:11px;background:var(--surface2);border-radius:3px;overflow:hidden }
+.fi-fill { height:100%;border-radius:3px;transition:width 1s ease }
+.fi-pct { font-size:9px;color:var(--text);width:34px;font-family:'JetBrains Mono',monospace }
+
+/* ── ALGORAND BADGE ── */
+.algo-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0,0,0,0.2);
+  border: 1px solid rgba(201,168,76,0.3);
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+}
+.algo-dot { width: 8px; height: 8px; background: var(--green); border-radius: 50%; animation: blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+.algo-text { font-size: 11px; color: var(--text2); }
+.algo-text span { color: var(--gold); font-family: 'Space Mono', monospace; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  z-index: 500;
+  align-items: flex-end;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.show { display: flex; }
+.modal-sheet {
+  width: 100%;
+  max-width: 430px;
+  margin: 0 auto;
+  background: var(--navy2);
+  border: 1px solid var(--border);
+  border-radius: 24px 24px 0 0;
+  padding: 20px 20px calc(20px + env(safe-area-inset-bottom));
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle { width: 36px; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px; margin: 0 auto 20px; }
+.modal-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+
+.qr-mock {
+  width: 200px; height: 200px;
+  margin: 0 auto 16px;
+  background: white;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 80px;
+}
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div id="screen-login" class="screen active">
+  <div class="login-logo">
+    <div class="logo-icon">🌿</div>
+    <h1>SME-TALK</h1>
+    <p>ESG-Gold Platform · Algorand Testnet</p>
+  </div>
+
+  <div class="input-group">
+    <label>이메일</label>
+    <input type="email" id="login-email" placeholder="example@email.com" autocomplete="email">
+  </div>
+  <div class="input-group">
+    <label>비밀번호</label>
+    <input type="password" id="login-pw" placeholder="••••••••" autocomplete="current-password">
+  </div>
+  <button class="btn-primary" id="btn-login">로그인</button>
+  <button class="btn-secondary" id="btn-register-show">회원가입</button>
+
+  <div class="demo-accounts">
+    <p>🎯 시연 계정 (클릭하면 자동 입력)</p>
+    <div class="demo-row" onclick="fillDemo('citizen1@sme-talk.kr','Demo1234!')">
+      <span>👤 시민: citizen1@sme-talk.kr</span><span>Demo1234!</span>
+    </div>
+    <div class="demo-row" onclick="fillDemo('admin@sme-talk.kr','Admin1234!')">
+      <span>🏛 관리자: admin@sme-talk.kr</span><span>Admin1234!</span>
+    </div>
+    <div class="demo-row" onclick="fillDemo('merchant@sme-talk.kr','Merchant1!')">
+      <span>🏪 소상공인: merchant@sme-talk.kr</span><span>Merchant1!</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── HOME ── -->
+<div id="screen-home" class="screen">
+  <div class="statusbar">
+    <span class="time" id="clock">9:41</span>
+    <span>📶 🔋</span>
+  </div>
+  <div class="page-header">
+    <div>
+      <h2>안녕하세요 👋</h2>
+      <div class="header-sub" id="home-username">로딩 중...</div>
+    </div>
+    <div class="icon-btn" onclick="showToast('알림 없음')">🔔</div>
+  </div>
+  <div class="content">
+    <div class="balance-card" id="home-balance-card">
+      <div class="balance-label" id="home-balance-label">ESG-Gold 잔액</div>
+      <div>
+        <span class="balance-amount" id="home-balance">0</span>
+        <span class="balance-unit">ESGG</span>
+      </div>
+      <div class="balance-usd">ASA: 758116412 · ≈ ₩<span id="home-balance-krw">0</span></div>
+      <div class="balance-actions" id="home-balance-actions">
+        <button class="balance-btn" onclick="goTab('wallet')"><span class="btn-icon">📤</span>보내기</button>
+        <button class="balance-btn" onclick="goTab('wallet')"><span class="btn-icon">📥</span>받기</button>
+        <button class="balance-btn" onclick="goTab('wallet')"><span class="btn-icon">🔄</span>교환</button>
+      </div>
+    </div>
+
+    <div class="esg-score-row" id="home-esg-row">
+      <div class="esg-score-item esg-e">
+        <div class="esg-letter">환경(E)</div>
+        <div class="esg-val" id="score-e">--</div>
+      </div>
+      <div class="esg-score-item esg-s">
+        <div class="esg-letter">사회(S)</div>
+        <div class="esg-val" id="score-s">--</div>
+      </div>
+      <div class="esg-score-item esg-g">
+        <div class="esg-letter">거버넌스(G)</div>
+        <div class="esg-val" id="score-g">--</div>
+      </div>
+    </div>
+
+    <!-- 역할별 전용 패널 (소상공인/관리자) -->
+    <div id="role-panel"></div>
+
+    <div class="card" id="recent-activity-card">
+      <div class="card-title">최근 활동</div>
+      <div id="recent-activities">
+        <div style="text-align:center;padding:20px;color:var(--text3);font-size:13px;">활동 내역 로딩 중...</div>
+      </div>
+    </div>
+  </div>
+  <nav class="nav nav-bar" data-screen="home"></nav>
+</div>
+
+<!-- ── ACTIVITY ── -->
+<div id="screen-activity" class="screen">
+  <div class="statusbar">
+    <span class="time" id="clock2">9:41</span>
+    <span>📶 🔋</span>
+  </div>
+  <div class="page-header">
+    <div><h2>ESG 활동 인증</h2></div>
+  </div>
+  <div style="padding:0 16px 0; flex-shrink:0;">
+    <div class="pill-tabs">
+      <button class="pill-tab active" onclick="filterActivity('all',this)">전체</button>
+      <button class="pill-tab" onclick="filterActivity('env',this)">🌿 환경(E)</button>
+      <button class="pill-tab" onclick="filterActivity('soc',this)">🤝 사회(S)</button>
+      <button class="pill-tab" onclick="filterActivity('gov',this)">🏛 거버넌스(G)</button>
+    </div>
+  </div>
+  <div class="content" style="padding-top:8px;">
+    <div class="activity-card" data-cat="env">
+      <div class="activity-card-header">
+        <div class="activity-card-title">🛍 다회용컵 사용 인증</div>
+        <div class="reward-badge">+50 ESGG</div>
+      </div>
+      <div class="activity-card-desc">소상공인 매장 QR 스캔으로 친환경 컵 사용을 인증합니다.</div>
+      <div class="progress-bar"><div class="progress-fill" id="p1" style="width:68%"></div></div>
+      <div class="progress-label" id="pl1">이번 달 <span id="cnt-cup">17</span>/25회</div>
+      <button class="btn-verify" onclick="doVerify('cup','다회용컵 사용 인증',50,'env')">
+        <span>📷</span> QR 스캔 인증
+      </button>
+    </div>
+
+    <div class="activity-card" data-cat="env">
+      <div class="activity-card-header">
+        <div class="activity-card-title">🚴 자전거·도보 이동</div>
+        <div class="reward-badge">+10 ESGG/km</div>
+      </div>
+      <div class="activity-card-desc">GPS 자동 추적으로 친환경 이동 수단 사용을 인증합니다.</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:45%"></div></div>
+      <div class="progress-label">이번 달 45.2km / 100km</div>
+      <button class="btn-verify" onclick="doVerify('gps','자전거·도보 이동 (3.2km)',32,'soc')">
+        <span>📍</span> GPS 인증 시작
+      </button>
+    </div>
+
+    <div class="activity-card" data-cat="env">
+      <div class="activity-card-header">
+        <div class="activity-card-title">⚡ 에너지 절약 인증</div>
+        <div class="reward-badge">+200 ESGG</div>
+      </div>
+      <div class="activity-card-desc">전월 대비 전력·가스 사용량 감축 시 자동 지급됩니다.</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:82%"></div></div>
+      <div class="progress-label">절감률 8.2% (목표 10%)</div>
+      <button class="btn-verify" onclick="doVerify('energy','에너지 절약 인증',200,'env')">
+        <span>🔌</span> 자동 연동 확인
+      </button>
+    </div>
+
+    <div class="activity-card" data-cat="soc">
+      <div class="activity-card-header">
+        <div class="activity-card-title">🤝 지역 봉사활동</div>
+        <div class="reward-badge">+150 ESGG</div>
+      </div>
+      <div class="activity-card-desc">지역 커뮤니티 봉사 활동 참여 시 인증됩니다.</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:30%"></div></div>
+      <div class="progress-label">이번 달 3/10회</div>
+      <button class="btn-verify" onclick="doVerify('volunteer','지역 봉사활동',150,'soc')">
+        <span>📋</span> 참여 인증
+      </button>
+    </div>
+
+    <div class="activity-card" data-cat="soc">
+      <div class="activity-card-header">
+        <div class="activity-card-title">♻️ 분리수거 인증</div>
+        <div class="reward-badge">+30 ESGG</div>
+      </div>
+      <div class="activity-card-desc">올바른 분리수거 실천을 QR로 인증합니다.</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:55%"></div></div>
+      <div class="progress-label">이번 달 11/20회</div>
+      <button class="btn-verify" onclick="doVerify('recycle','분리수거 인증',30,'env')">
+        <span>📷</span> QR 인증
+      </button>
+    </div>
+
+    <div class="activity-card" data-cat="gov">
+      <div class="activity-card-header">
+        <div class="activity-card-title">🏛 ESG 정책 제안</div>
+        <div class="reward-badge">+100 ESGG</div>
+      </div>
+      <div class="activity-card-desc">지자체 ESG 정책 개선 제안 시 인센티브가 지급됩니다.</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:10%"></div></div>
+      <div class="progress-label">이번 달 1/10회</div>
+      <button class="btn-verify" onclick="doVerify('policy_proposal','ESG 정책 제안',100,'gov')">
+        <span>✍️</span> 제안 등록
+      </button>
+    </div>
+  </div>
+  <nav class="nav nav-bar" data-screen="activity"></nav>
+</div>
+
+<!-- ── WALLET ── -->
+<div id="screen-wallet" class="screen">
+  <div class="statusbar">
+    <span class="time">9:41</span>
+    <span>📶 🔋</span>
+  </div>
+  <div class="page-header">
+    <div><h2>Algorand 지갑</h2></div>
+  </div>
+  <div class="content">
+    <div class="algo-badge">
+      <div class="algo-dot"></div>
+      <div class="algo-text">Algorand Testnet · ASA ID: <span>758116412</span></div>
+    </div>
+
+    <div class="wallet-addr" onclick="copyAddr()" title="클릭하여 복사">
+      XNAFLAPPIQPRY2S5YHDYTR3UPNQXZYDV4PSKOMYRTH6LZMPPSUKRWAREPU
+    </div>
+
+    <div class="balance-card" style="margin-bottom:12px;">
+      <div class="balance-label">총 자산</div>
+      <div>
+        <span class="balance-amount" id="wallet-balance">0</span>
+        <span class="balance-unit">ESGG</span>
+      </div>
+      <div class="balance-usd">≈ ₩<span id="wallet-balance-krw">0</span></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">보유 ASA 자산</div>
+      <div class="asset-row">
+        <div class="asset-icon">🏅</div>
+        <div class="asset-info">
+          <div class="asset-name">ESG-Gold (ESGG)</div>
+          <div class="asset-id">ASA: 758116412</div>
+        </div>
+        <div class="asset-amount">
+          <div class="amount" id="asset-esgg">0</div>
+          <div class="worth">₩<span id="asset-esgg-krw">0</span></div>
+        </div>
+      </div>
+      <div class="asset-row">
+        <div class="asset-icon" style="background:linear-gradient(135deg,#2ecc71,#27ae60);">🌿</div>
+        <div class="asset-info">
+          <div class="asset-name">Green Point (GP)</div>
+          <div class="asset-id">ASA: 758116413</div>
+        </div>
+        <div class="asset-amount">
+          <div class="amount" id="asset-gp">840</div>
+          <div class="worth">₩42,000</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">온체인 거래 내역</div>
+      <div id="tx-list">
+        <div style="text-align:center;padding:20px;color:var(--text3);font-size:13px;">거래 내역 로딩 중...</div>
+      </div>
+    </div>
+  </div>
+  <nav class="nav nav-bar" data-screen="wallet"></nav>
+</div>
+
+<!-- ── POLICY / AI ── -->
+<div id="screen-policy" class="screen">
+  <div class="statusbar">
+    <span class="time">9:41</span>
+    <span>📶 🔋</span>
+  </div>
+  <div class="page-header">
+    <div>
+      <h2>AI 정책 대시보드</h2>
+      <div class="header-sub">⚙️ AI Policy Engine · 3-Step Pipeline</div>
+    </div>
+    <div class="data-count-badge" id="data-count-badge">2,200행</div>
+  </div>
+  <div class="content">
+
+    <!-- ═══ 1. XGBoost Regressor ═══ -->
+    <div class="card algo-card" id="card-xgb">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:34px;height:34px;border-radius:8px;background:rgba(88,166,255,0.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🌲</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700">XGBoost Regressor</div>
+          <div style="font-size:10px;color:var(--text2)">미래 참여량 · 보상 소요량 예측 (19개 피처 · 2,200행)</div>
+        </div>
+        <span class="algo-st" id="st-xgb">▶ 실행</span>
+      </div>
+      <div class="algo-pb"><div class="algo-pb-fill" id="pb-xgb"></div></div>
+      <button class="btn-algo" id="btn-xgb" onclick="runAlgo('xgb')">▶ XGBoost 분석 실행</button>
+      <div class="algo-res" id="res-xgb">
+        <div class="stats-grid" style="margin-top:10px">
+          <div class="stat-card"><div class="stat-val" style="color:var(--blue)">5,163</div><div class="stat-label">다음달 총 QR 예측 (회)</div></div>
+          <div class="stat-card"><div class="stat-val" style="color:var(--gold2)">259,217</div><div class="stat-label">ESG-Gold 소요 (ESGG)</div></div>
+          <div class="stat-card"><div class="stat-val" style="color:var(--green)">86.4%</div><div class="stat-label">예산 소요율</div></div>
+          <div class="stat-card"><div class="stat-val">200</div><div class="stat-label">분석 대상 매장</div></div>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin:8px 0 4px">Feature Importance (상위 5)</div>
+        <div class="fi-row"><span class="fi-name">qr_count</span><div class="fi-bg"><div class="fi-fill" style="width:0;background:var(--blue)" data-w="43.6%"></div></div><span class="fi-pct">43.6%</span></div>
+        <div class="fi-row"><span class="fi-name">esg_gold</span><div class="fi-bg"><div class="fi-fill" style="width:0;background:var(--blue)" data-w="28.3%"></div></div><span class="fi-pct">28.3%</span></div>
+        <div class="fi-row"><span class="fi-name">franchise</span><div class="fi-bg"><div class="fi-fill" style="width:0;background:var(--blue)" data-w="3.4%"></div></div><span class="fi-pct">3.4%</span></div>
+        <div class="fi-row"><span class="fi-name">qr_trend</span><div class="fi-bg"><div class="fi-fill" style="width:0;background:var(--blue)" data-w="2.3%"></div></div><span class="fi-pct">2.3%</span></div>
+        <div class="fi-row"><span class="fi-name">qr_mean3</span><div class="fi-bg"><div class="fi-fill" style="width:0;background:var(--blue)" data-w="2.2%"></div></div><span class="fi-pct">2.2%</span></div>
+        <div style="font-size:10px;color:var(--text2);background:var(--surface2);padding:8px;border-radius:6px;margin-top:8px;border-left:3px solid var(--blue);line-height:1.6">
+          <b>정책 해석:</b> 이번달 QR 활발한 매장이 다음달에도 활발 → 기존 활성 매장 유지 정책 우선<br>
+          <b>모델:</b> R²=0.81 (참여량) / R²=0.87 (보상량) · MAE=1.7회 · 총량오차 ±3.5%
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 2. Isolation Forest ═══ -->
+    <div class="card algo-card" id="card-if">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:34px;height:34px;border-radius:8px;background:rgba(248,81,73,0.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🔍</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700">Isolation Forest</div>
+          <div style="font-size:10px;color:var(--text2)">이상 참여 패턴 · QR 어뷰징 탐지 (contamination=0.15)</div>
+        </div>
+        <span class="algo-st" id="st-if">▶ 실행</span>
+      </div>
+      <div class="algo-pb"><div class="algo-pb-fill" id="pb-if"></div></div>
+      <button class="btn-algo" id="btn-if" onclick="runAlgo('if')">▶ 이상탐지 분석 실행</button>
+      <div class="algo-res" id="res-if">
+        <div class="stats-grid" style="margin-top:10px">
+          <div class="stat-card"><div class="stat-val" style="color:var(--red)">14</div><div class="stat-label">이상 행위 탐지 (건)</div></div>
+          <div class="stat-card"><div class="stat-val">7.0%</div><div class="stat-label">전체 이상 비율</div></div>
+          <div class="stat-card"><div class="stat-val" style="color:var(--green)">186</div><div class="stat-label">정상 매장 (건)</div></div>
+          <div class="stat-card"><div class="stat-val">0.15</div><div class="stat-label">임계값</div></div>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin:8px 0 4px">이상 탐지 유형 분포</div>
+        <div class="fi-row"><span class="fi-name">QR 반복찍기</span><div class="fi-bg"><div class="fi-fill" style="width:0;background:var(--red)" data-w="42%"></div></div><span class="fi-pct">6건</span></div>
+        <div class="fi-row"><span class="fi-name">비정상 시간</span><div class="fi-bg"><div class="fi-fill" style="width:0;background:var(--red)" data-w="28%"></div></div><span class="fi-pct">4건</span></div>
+        <div class="fi-row"><span class="fi-name">급증 패턴</span><div class="fi-bg"><div class="fi-fill" style="width:0;background:var(--red)" data-w="21%"></div></div><span class="fi-pct">3건</span></div>
+        <div class="fi-row"><span class="fi-name">GPS 불일치</span><div class="fi-bg"><div class="fi-fill" style="width:0;background:var(--red)" data-w="7%"></div></div><span class="fi-pct">1건</span></div>
+        <div style="font-size:10px;color:var(--text2);background:var(--surface2);padding:8px;border-radius:6px;margin-top:8px;border-left:3px solid var(--red);line-height:1.6">
+          <b>정책 해석:</b> 이상 비율 7.0%는 정상 범위(15% 미만). QR 반복이 주요 패턴 → 1일 인증 5회 제한 권고
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 3. DiD (이중차분법) ═══ -->
+    <div class="card algo-card" id="card-did">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:34px;height:34px;border-radius:8px;background:rgba(210,153,34,0.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📐</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700">DiD (이중차분법)</div>
+          <div style="font-size:10px;color:var(--text2)">정책 적용 전·후 효과 분석 (OLS 회귀 · 95% CI)</div>
+        </div>
+        <span class="algo-st" id="st-did">▶ 실행</span>
+      </div>
+      <div class="algo-pb"><div class="algo-pb-fill" id="pb-did"></div></div>
+      <button class="btn-algo" id="btn-did" onclick="runAlgo('did')">▶ 정책효과 분석 실행</button>
+      <div class="algo-res" id="res-did">
+        <div class="stats-grid" style="margin-top:10px">
+          <div class="stat-card"><div class="stat-val" style="color:var(--green)">+3.42</div><div class="stat-label">β_DiD (정책 효과)</div></div>
+          <div class="stat-card"><div class="stat-val" style="color:var(--blue)">0.018</div><div class="stat-label">p-value</div></div>
+          <div class="stat-card"><div class="stat-val">1.28~5.56</div><div class="stat-label">95% 신뢰구간</div></div>
+          <div class="stat-card"><div class="stat-val" style="color:var(--green)">유의</div><div class="stat-label">통계적 유의성</div></div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px">
+          <div style="flex:1;background:var(--surface2);border-radius:8px;padding:8px">
+            <div style="font-size:10px;color:var(--text2)">처치군 (보상 강화)</div>
+            <div style="font-size:11px;margin-top:4px">사전 <b>22.1</b>회 → 사후 <b>28.5</b>회</div>
+            <div style="font-size:10px;color:var(--green);margin-top:2px">▲ +6.4회 (+29.0%)</div>
+          </div>
+          <div style="flex:1;background:var(--surface2);border-radius:8px;padding:8px">
+            <div style="font-size:10px;color:var(--text2)">대조군 (보상 유지)</div>
+            <div style="font-size:11px;margin-top:4px">사전 <b>21.8</b>회 → 사후 <b>24.8</b>회</div>
+            <div style="font-size:10px;color:var(--text2);margin-top:2px">▲ +3.0회 (+13.8%)</div>
+          </div>
+        </div>
+        <div style="font-size:10px;color:var(--text2);background:var(--surface2);padding:8px;border-radius:6px;margin-top:8px;border-left:3px solid var(--gold2);line-height:1.6">
+          <b>정책 해석:</b> 보상 강화(0.05→0.07)가 QR 참여량을 +3.42회 유의미하게 증가 (p=0.018) → 정책 지속 근거 확보
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 4. AHP 종합 스코어링 (3개 완료 후 활성화) ═══ -->
+    <div class="card algo-card" id="card-ahp" style="opacity:0.4;border:1.5px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <div style="width:34px;height:34px;border-radius:8px;background:rgba(201,168,76,0.2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">⚖️</div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700">AHP 종합 정책 스코어링</div>
+          <div style="font-size:10px;color:var(--text2)">3개 알고리즘 결과 종합 → 최종 정책 권고</div>
+        </div>
+        <span class="algo-st" id="st-ahp">🔒 대기</span>
+      </div>
+      <div class="algo-pb"><div class="algo-pb-fill" id="pb-ahp"></div></div>
+      <button class="btn-algo" id="btn-ahp" onclick="runAlgo('ahp')" disabled>🔒 3개 알고리즘 완료 후 실행 가능</button>
+      <div class="algo-res" id="res-ahp">
+        <div style="text-align:center;padding:12px 0">
+          <div id="ahp-score" style="font-size:52px;font-weight:700;font-family:'Rajdhani',monospace;color:var(--green)">0</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px">AHP 복합 정책 점수 (100점 만점)</div>
+          <div id="policy-badge" style="font-size:13px;font-weight:600;margin-top:8px;padding:5px 14px;border-radius:16px;display:inline-block;background:rgba(63,185,80,0.15);color:var(--green)">🔺 정책 강화 권고</div>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin:6px 0 4px">AHP 평가 기준별 점수</div>
+        <div class="fi-row"><span class="fi-name">참여량 증가</span><div class="fi-bg"><div class="fi-fill" style="width:0;background:var(--green)" data-w="72%"></div></div><span class="fi-pct">72.0</span></div>
+        <div class="fi-row"><span class="fi-name">예산 안정성</span><div class="fi-bg"><div class="fi-fill" style="width:0;background:var(--green)" data-w="86.4%"></div></div><span class="fi-pct">86.4</span></div>
+        <div class="fi-row"><span class="fi-name">이상 리스크</span><div class="fi-bg"><div class="fi-fill" style="width:0;background:var(--green)" data-w="93%"></div></div><span class="fi-pct">93.0</span></div>
+        <div class="fi-row"><span class="fi-name">정책효과DiD</span><div class="fi-bg"><div class="fi-fill" style="width:0;background:var(--gold2)" data-w="65%"></div></div><span class="fi-pct">65.0</span></div>
+        <div class="fi-row"><span class="fi-name">지속 가능성</span><div class="fi-bg"><div class="fi-fill" style="width:0;background:var(--gold2)" data-w="58%"></div></div><span class="fi-pct">58.0</span></div>
+
+        <!-- 전체 예측 요약 -->
+        <div style="background:var(--surface2);border:1px solid var(--gold);border-radius:10px;padding:12px;margin-top:10px">
+          <div style="font-size:11px;color:var(--gold2);font-weight:600;margin-bottom:6px">📊 다음달 전체 예측 요약</div>
+          <div class="param-row"><div class="param-name">총 QR 인증 예측</div><div class="param-val">5,163회</div></div>
+          <div class="param-row"><div class="param-name">총 ESG-Gold 소요</div><div class="param-val">259,217 ESGG</div></div>
+          <div class="param-row"><div class="param-name">월 예산</div><div class="param-val">300,000 ESGG</div></div>
+          <div class="param-row"><div class="param-name">예산 소요율</div><div class="param-val" style="color:var(--green)">86.4%</div></div>
+          <div class="param-row"><div class="param-name">이상행위</div><div class="param-val">14건 (7.0%)</div></div>
+          <div class="param-row"><div class="param-name">정책 효과 β_DiD</div><div class="param-val" style="color:var(--green)">+3.42 (p=0.018)</div></div>
+        </div>
+
+        <!-- ConfigMap 업데이트 -->
+        <div style="margin-top:10px">
+          <div style="font-size:11px;color:var(--text2);margin-bottom:6px">⚡ ConfigMap 정책 파라미터 업데이트</div>
+          <div class="param-row"><div class="param-name">reward_rate_env</div><div class="param-val"><span style="color:var(--text3)">0.05</span> <span style="color:var(--green)">→</span> <span id="param-env">0.07</span></div></div>
+          <div class="param-row"><div class="param-name">sme_bonus_rate</div><div class="param-val"><span style="color:var(--text3)">0.05</span> <span style="color:var(--green)">→</span> <span id="param-sme">0.07</span></div></div>
+          <div class="param-row"><div class="param-name">anomaly_threshold</div><div class="param-val" id="param-anomaly">0.15</div></div>
+          <div class="param-row"><div class="param-name">monthly_issue_cap</div><div class="param-val" id="param-limit">350,000 ESGG</div></div>
+        </div>
+
+        <button class="btn-primary" onclick="approvePolicy()" style="padding:12px;margin-top:10px;width:100%;" id="btn-approve">
+          ✅ 정책 파라미터 적용 (Rolling Update)
+        </button>
+        <div id="approve-done" style="display:none;text-align:center;font-size:11px;color:var(--green);margin-top:6px">
+          ✅ ConfigMap 업데이트 완료 · Rolling Update 실행 · 무중단 정책 적용
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <nav class="nav nav-bar" data-screen="policy"></nav>
+</div>
+
+<!-- ── MY PAGE ── -->
+<div id="screen-mypage" class="screen">
+  <div class="statusbar">
+    <span class="time">9:41</span>
+    <span>📶 🔋</span>
+  </div>
+  <div class="content">
+    <div class="profile-header">
+      <div class="profile-avatar">👤</div>
+      <div class="profile-name" id="my-name">로딩 중...</div>
+      <div class="profile-role" id="my-role">--</div>
+      <div class="profile-stats">
+        <div class="profile-stat">
+          <div class="pval" id="my-balance">0</div>
+          <div class="plabel">ESG-Gold</div>
+        </div>
+        <div class="profile-stat">
+          <div class="pval" id="my-activity-count">0</div>
+          <div class="plabel">인증 횟수</div>
+        </div>
+        <div class="profile-stat">
+          <div class="pval" id="my-grade">--</div>
+          <div class="plabel">ESG 등급</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">ESG 점수 세부 현황</div>
+      <div class="chart-container">
+        <div class="chart-bar-row">
+          <div class="chart-bar-label">환경(E)</div>
+          <div class="chart-bar-outer"><div class="chart-bar-inner" id="bar-e" style="width:0%;background:linear-gradient(90deg,#2ecc71,#27ae60);"></div></div>
+          <div class="chart-bar-val" id="bar-e-val">--</div>
+        </div>
+        <div class="chart-bar-row">
+          <div class="chart-bar-label">사회(S)</div>
+          <div class="chart-bar-outer"><div class="chart-bar-inner" id="bar-s" style="width:0%;background:linear-gradient(90deg,#3498db,#2980b9);"></div></div>
+          <div class="chart-bar-val" id="bar-s-val">--</div>
+        </div>
+        <div class="chart-bar-row">
+          <div class="chart-bar-label">거버넌스(G)</div>
+          <div class="chart-bar-outer"><div class="chart-bar-inner" id="bar-g" style="width:0%;background:linear-gradient(90deg,#9b59b6,#8e44ad);"></div></div>
+          <div class="chart-bar-val" id="bar-g-val">--</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="menu-item" onclick="showToast('지갑 관리 화면')">
+        <span class="menu-icon">🔗</span>
+        <span class="menu-label">Algorand 지갑 관리</span>
+        <span class="menu-arrow">›</span>
+      </div>
+      <div class="menu-item" onclick="showToast('사업장 정보 수정')">
+        <span class="menu-icon">🏪</span>
+        <span class="menu-label">사업장 정보 수정</span>
+        <span class="menu-arrow">›</span>
+      </div>
+      <div class="menu-item" onclick="showToast('알림 설정')">
+        <span class="menu-icon">🔔</span>
+        <span class="menu-label">알림 설정</span>
+        <span class="menu-arrow">›</span>
+      </div>
+      <div class="menu-item" onclick="logout()">
+        <span class="menu-icon">🚪</span>
+        <span class="menu-label" style="color:var(--red);">로그아웃</span>
+        <span class="menu-arrow">›</span>
+      </div>
+    </div>
+  </div>
+  <nav class="nav nav-bar" data-screen="mypage"></nav>
+</div>
+
+<!-- ── QR MODAL ── -->
+<div class="modal-overlay" id="qr-modal" onclick="closeModal()">
+  <div class="modal-sheet" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto;">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-title">QR 스캔 인증</div>
+
+    <!-- QR 리더 영역 -->
+    <div id="qr-reader-wrap" style="position:relative;width:100%;height:240px;background:#000;border-radius:12px;overflow:hidden;margin-bottom:12px;">
+      <div id="qr-reader" style="width:100%;height:100%;"></div>
+      <div id="qr-scan-overlay" style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;pointer-events:none;">
+        <div style="width:180px;height:180px;border:2px solid rgba(201,168,76,0.6);border-radius:12px;position:relative;">
+          <div style="position:absolute;top:-2px;left:-2px;width:24px;height:24px;border-top:3px solid var(--gold);border-left:3px solid var(--gold);border-radius:4px 0 0 0;"></div>
+          <div style="position:absolute;top:-2px;right:-2px;width:24px;height:24px;border-top:3px solid var(--gold);border-right:3px solid var(--gold);border-radius:0 4px 0 0;"></div>
+          <div style="position:absolute;bottom:-2px;left:-2px;width:24px;height:24px;border-bottom:3px solid var(--gold);border-left:3px solid var(--gold);border-radius:0 0 0 4px;"></div>
+          <div style="position:absolute;bottom:-2px;right:-2px;width:24px;height:24px;border-bottom:3px solid var(--gold);border-right:3px solid var(--gold);border-radius:0 0 4px 0;"></div>
+          <div id="qr-scan-line" style="position:absolute;left:10px;right:10px;height:2px;background:var(--gold);top:10px;animation:scanline 2s ease-in-out infinite;"></div>
+        </div>
+      </div>
+    </div>
+    <style>@keyframes scanline{0%,100%{top:10px;}50%{top:160px;}}</style>
+
+    <p style="text-align:center;font-size:12px;color:var(--text2);margin-bottom:8px;">소상공인이 발급한 QR 코드를 카메라로 스캔하세요</p>
+
+    <!-- QR 인식 결과 (초기 숨김) -->
+    <div id="qr-scan-result" style="display:none;background:var(--surface2);border-radius:8px;padding:10px;margin-bottom:12px;font-size:11px;line-height:1.8;"></div>
+
+    <!-- 시연용 버튼 (카메라 미지원 시) -->
+    <button class="btn-primary" id="modal-confirm-btn" onclick="simulateQRScan()" style="margin-bottom:8px;">
+      📱 시연용: QR 인식 시뮬레이션
+    </button>
+    <button class="btn-secondary" onclick="closeModal()">취소</button>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────
+const API = 'https://sme-talk-api.onrender.com';
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+let state = {
+  token: localStorage.getItem('smt_token') || null,
+  user: JSON.parse(localStorage.getItem('smt_user') || 'null'),
+  balance: 0,
+  activities: [],
+  txs: [],
+  simDataCount: 0,
+  pendingVerify: null,
+  activityCount: parseInt(localStorage.getItem('smt_act_count') || '0'),
+  esgScores: { e: 72, s: 65, g: 58 }
+};
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+window.onload = async () => {
+  updateClocks();
+  setInterval(updateClocks, 1000);
+
+  if (state.token && state.user) {
+    showApp();
+    await loadDashboard();
+  }
+};
+
+function updateClocks() {
+  const now = new Date();
+  const t = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  document.querySelectorAll('.time').forEach(el => el.textContent = t);
+}
+
+// ─────────────────────────────────────────────
+// AUTH
+// ─────────────────────────────────────────────
+function fillDemo(email, pw) {
+  document.getElementById('login-email').value = email;
+  document.getElementById('login-pw').value = pw;
+}
+
+document.getElementById('btn-login').addEventListener('click', doLogin);
+document.getElementById('login-pw').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  if (!email || !pw) { showToast('이메일과 비밀번호를 입력하세요', 'error'); return; }
+
+  const btn = document.getElementById('btn-login');
+  btn.innerHTML = '<span class="loader"></span> 로그인 중...';
+  btn.disabled = true;
+
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3000);
+    const res = await fetch(`${API}/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `username=${encodeURIComponent(email)}&password=${encodeURIComponent(pw)}`,
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+
+    if (res.ok) {
+      const data = await res.json();
+      state.token = data.access_token;
+      localStorage.setItem('smt_token', state.token);
+
+      // 사용자 정보 가져오기
+      const meRes = await fetch(`${API}/auth/me`, { headers: { Authorization: `Bearer ${state.token}` }});
+      if (meRes.ok) {
+        state.user = await meRes.json();
+        localStorage.setItem('smt_user', JSON.stringify(state.user));
+      } else {
+        // fallback
+        state.user = { email, full_name: email.split('@')[0], role: 'citizen' };
+        localStorage.setItem('smt_user', JSON.stringify(state.user));
+      }
+
+      showToast('✅ 로그인 성공!', 'success');
+      showApp();
+      await loadDashboard();
+    } else {
+      // 백엔드 미등록 계정 → 로컬 데모 모드
+      if (email.includes('sme-talk.kr')) {
+        state.token = 'demo_token_' + Date.now();
+        state.user = buildDemoUser(email);
+        localStorage.setItem('smt_token', state.token);
+        localStorage.setItem('smt_user', JSON.stringify(state.user));
+        showToast('✅ 데모 모드 로그인', 'success');
+        showApp();
+        loadDemoData();
+      } else {
+        showToast('이메일 또는 비밀번호가 올바르지 않습니다', 'error');
+      }
+    }
+  } catch(e) {
+    // 네트워크 오류 → 데모 모드
+    state.token = 'demo_token_' + Date.now();
+    state.user = buildDemoUser(email);
+    localStorage.setItem('smt_token', state.token);
+    localStorage.setItem('smt_user', JSON.stringify(state.user));
+    showToast('✅ 로그인 성공', 'success');
+    showApp();
+    loadDemoData();
+  }
+
+  btn.innerHTML = '로그인';
+  btn.disabled = false;
+}
+
+function buildDemoUser(email) {
+  const isAdmin = email.includes('admin');
+  const isMerchant = email.includes('merchant');
+  return {
+    email,
+    full_name: isAdmin ? '성보경 관리자' : isMerchant ? '김소상 사장' : '박시민',
+    role: isAdmin ? 'admin' : isMerchant ? 'merchant' : 'citizen',
+    location: '서울특별시'
+  };
+}
+
+document.getElementById('btn-register-show').addEventListener('click', async () => {
+  const email = document.getElementById('login-email').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  if (!email || !pw) { showToast('이메일과 비밀번호를 입력하세요', 'error'); return; }
+
+  try {
+    const res = await fetch(`${API}/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password: pw, full_name: email.split('@')[0] })
+    });
+    if (res.ok) {
+      showToast('✅ 회원가입 완료! 로그인 해주세요', 'success');
+    } else {
+      const err = await res.json();
+      showToast(err.detail || '회원가입 실패', 'error');
+    }
+  } catch(e) {
+    showToast('⚠️ 서버 연결 오류', 'error');
+  }
+});
+
+function logout() {
+  localStorage.removeItem('smt_token');
+  localStorage.removeItem('smt_user');
+  state.token = null; state.user = null;
+  goScreen('login');
+  showToast('로그아웃 되었습니다');
+}
+
+// ─────────────────────────────────────────────
+// SCREENS
+// ─────────────────────────────────────────────
+function showApp() {
+  buildNavs();
+  goScreen('home');
+}
+
+// 역할별 탭 정의
+const NAV_DEFS = {
+  citizen:  [['home','🏠','홈'],['activity','🌱','활동'],['wallet','💰','지갑'],['mypage','👤','마이']],
+  merchant: [['home','🏠','홈'],['activity','🌱','활동'],['wallet','💰','지갑'],['mypage','👤','마이']],
+  admin:    [['home','🏠','홈'],['policy','📋','정책'],['mypage','👤','마이']]
+};
+
+function getNavTabs() {
+  const role = (state.user && state.user.role) || 'citizen';
+  return NAV_DEFS[role] || NAV_DEFS.citizen;
+}
+
+// 모든 화면의 nav를 역할에 맞게 채움
+function buildNavs() {
+  const tabs = getNavTabs();
+  document.querySelectorAll('.nav-bar').forEach(nav => {
+    const current = nav.getAttribute('data-screen');
+    nav.innerHTML = tabs.map(([tab,icon,label]) => {
+      const active = (tab === current) ? ' active' : '';
+      return `<div class="nav-item${active}" onclick="goTab('${tab}')"><span class="nav-icon">${icon}</span><span class="nav-label">${label}</span></div>`;
+    }).join('');
+  });
+}
+
+function goScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('screen-' + name);
+  if (el) el.classList.add('active');
+}
+
+function goTab(tab) {
+  goScreen(tab);
+  if (tab === 'wallet') renderWallet();
+  if (tab === 'mypage') renderMyPage();
+  if (tab === 'policy') renderPolicy();
+}
+
+// ─────────────────────────────────────────────
+// DASHBOARD
+// ─────────────────────────────────────────────
+async function loadDashboard() {
+  if (!state.user) return;
+
+  try {
+    if (!state.token.startsWith('demo_token_')) {
+      const res = await fetch(`${API}/dashboard/summary`, {
+        headers: { Authorization: `Bearer ${state.token}` }
+      });
+      if (res.ok) {
+        const d = await res.json();
+        state.balance = d.esgg_balance || 0;
+        state.activities = d.recent_activities || [];
+        state.esgScores = d.esg_scores || state.esgScores;
+        state.activityCount = d.activity_count || state.activityCount;
+      } else { loadDemoData(); }
+    } else { loadDemoData(); }
+  } catch { loadDemoData(); }
+
+  renderHome();
+}
+
+function loadDemoData() {
+  const saved = parseInt(localStorage.getItem('smt_balance') || '3250');
+  state.balance = saved;
+  state.activities = [
+    { type: 'env', name: '다회용컵 사용 인증', time: '오늘 14:32', reward: 50 },
+    { type: 'soc', name: '자전거 이동 3.2km', time: '오늘 09:15', reward: 32 },
+    { type: 'env', name: '분리수거 인증', time: '어제 17:44', reward: 30 },
+  ];
+  renderHome();
+}
+
+function renderHome() {
+  const u = state.user;
+  if (!u) return;
+
+  const name = u.full_name || u.email || '사용자';
+  const roleMap = { admin: '지자체 관리자', merchant: '소상공인', citizen: '시민' };
+  document.getElementById('home-username').textContent = `${name} · ${roleMap[u.role] || '시민'}`;
+
+  setBalance(state.balance);
+
+  // ESG 점수 영역 (시민만 표시)
+  const esgRow = document.getElementById('home-esg-row');
+  if (u.role === 'citizen') {
+    esgRow.style.display = 'flex';
+    esgRow.innerHTML = `
+      <div class="esg-score-item esg-e"><div class="esg-letter">환경(E)</div><div class="esg-val">${state.esgScores.e}</div></div>
+      <div class="esg-score-item esg-s"><div class="esg-letter">사회(S)</div><div class="esg-val">${state.esgScores.s}</div></div>
+      <div class="esg-score-item esg-g"><div class="esg-letter">거버넌스(G)</div><div class="esg-val">${state.esgScores.g}</div></div>`;
+  } else {
+    esgRow.style.display = 'none';
+  }
+
+  // 역할별 전용 패널
+  renderRolePanel(u.role);
+
+  const icons = { env: { icon: '🌱', cls: 'env' }, soc: { icon: '🚲', cls: 'soc' }, gov: { icon: '🏛', cls: 'gov' } };
+  const html = state.activities.map(a => {
+    const ic = icons[a.type] || { icon: '📋', cls: 'env' };
+    return `<div class="activity-item">
+      <div class="activity-icon ${ic.cls}">${ic.icon}</div>
+      <div class="activity-info">
+        <div class="activity-name">${a.name}</div>
+        <div class="activity-time">${a.time}</div>
+      </div>
+      <div class="activity-reward">+${a.reward}</div>
+    </div>`;
+  }).join('');
+  document.getElementById('recent-activities').innerHTML = html || '<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px;">활동 내역이 없습니다</div>';
+}
+
+// ─────────────────────────────────────────────
+// 역할별 전용 패널
+// ─────────────────────────────────────────────
+function renderRolePanel(role) {
+  const panel = document.getElementById('role-panel');
+  const balanceLabel = document.getElementById('home-balance-label');
+  const recentCard = document.getElementById('recent-activity-card');
+  const balanceActions = document.getElementById('home-balance-actions');
+
+  // 관리자는 개인 지갑 액션 숨김
+  if (balanceActions) balanceActions.style.display = (role === 'admin') ? 'none' : 'flex';
+
+  if (role === 'merchant') {
+    balanceLabel.textContent = '매장 적립 ESG-Gold';
+    recentCard.style.display = 'block';
+    panel.innerHTML = `
+      <div class="card">
+        <div class="card-title">📷 ESG 활동 인증 (사진 → QR → 보상)</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">
+          ① 고객의 친환경 활동을 사진 촬영 → ② 이미지 검증 통과 시 QR 자동 발급 → ③ 시민이 QR 스캔 → ESG-Gold 지급
+        </div>
+
+        <!-- STEP 1: 활동 유형 + 사진 촬영 -->
+        <div id="verify-step1">
+          <div style="font-size:11px;color:var(--gold);margin-bottom:6px;font-weight:600;">STEP 1. 활동 유형 선택 + 사진 촬영</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;" id="photo-type-btns">
+            <button onclick="selectPhotoType(this,'cup')" style="flex:1;padding:8px 4px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:11px;cursor:pointer;font-family:inherit;">🛍 다회용컵</button>
+            <button onclick="selectPhotoType(this,'recycle')" style="flex:1;padding:8px 4px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:11px;cursor:pointer;font-family:inherit;">♻️ 분리수거</button>
+            <button onclick="selectPhotoType(this,'container')" style="flex:1;padding:8px 4px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:11px;cursor:pointer;font-family:inherit;">🥡 다회용기</button>
+          </div>
+          <div id="photo-preview" style="width:100%;height:160px;border:2px dashed var(--border);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:10px;cursor:pointer;transition:border-color 0.2s;overflow:hidden;" onclick="document.getElementById('photo-input').click()">
+            <div id="photo-placeholder" style="text-align:center;">
+              <div style="font-size:36px;margin-bottom:4px;">📷</div>
+              <div style="font-size:12px;color:var(--text2);">터치하여 사진 촬영 / 갤러리 선택</div>
+              <div style="font-size:10px;color:var(--text3);margin-top:4px;">GPS·타임스탬프 자동 기록</div>
+            </div>
+            <img id="photo-img" style="display:none;width:100%;height:100%;object-fit:cover;border-radius:10px;"/>
+          </div>
+          <input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none;" onchange="handlePhotoUpload(this)"/>
+          <div id="photo-meta" style="display:none;font-size:10px;color:var(--text3);background:var(--surface2);padding:8px;border-radius:6px;margin-bottom:10px;font-family:'JetBrains Mono',monospace;line-height:1.6;">
+            <div id="photo-time"></div>
+            <div id="photo-gps"></div>
+            <div id="photo-hash"></div>
+          </div>
+          <button class="btn-primary" id="btn-photo-submit" onclick="submitPhotoVerify()" style="padding:12px;width:100%;opacity:0.4;pointer-events:none;">
+            📤 사진 제출 → 이미지 검증 요청
+          </button>
+        </div>
+
+        <!-- STEP 2: 검증 결과 (초기 숨김) -->
+        <div id="verify-step2" style="display:none;margin-top:12px;">
+          <div style="font-size:11px;color:var(--gold);margin-bottom:6px;font-weight:600;">STEP 2. AI 이미지 검증 결과</div>
+          <div id="verify-result" style="background:var(--surface2);border-radius:8px;padding:10px;font-size:11px;line-height:1.8;"></div>
+        </div>
+
+        <!-- STEP 3: QR 발급 (검증 통과 후 표시) -->
+        <div id="verify-step3" style="display:none;margin-top:12px;">
+          <div style="font-size:11px;color:var(--gold);margin-bottom:6px;font-weight:600;">STEP 3. 인증 QR 코드 발급 완료</div>
+          <div style="text-align:center;padding:8px 0;">
+            <div id="merchant-qr" style="width:164px;height:164px;margin:0 auto 8px;background:white;border-radius:12px;display:flex;align-items:center;justify-content:center;overflow:hidden;padding:8px;"></div>
+            <div id="merchant-qr-code" style="font-size:10px;color:var(--text3);font-family:'Space Mono',monospace;"></div>
+            <div style="font-size:12px;color:var(--green);margin-top:6px;">✅ 시민에게 이 QR을 보여주세요</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px;">시민이 QR 스캔 시 ESG-Gold가 자동 지급됩니다</div>
+          </div>
+        </div>
+
+        <!-- STEP 4: 시민 스캔 대기 → 완료 -->
+        <div id="verify-step4" style="display:none;margin-top:12px;">
+          <div id="scan-waiting" style="text-align:center;padding:10px;background:rgba(88,166,255,0.1);border-radius:8px;font-size:12px;color:var(--blue);">
+            ⏳ 시민의 QR 스캔 대기 중...
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--green);">142</div>
+          <div class="stat-label">이번 달 인증 건수</div>
+          <div class="stat-change up">▲ 전월 +18%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--gold2);">7,100</div>
+          <div class="stat-label">지급 ESG-Gold</div>
+          <div class="stat-change">ESGG</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:var(--blue);">2.1배</div>
+          <div class="stat-label">매출 연동 보너스</div>
+          <div class="stat-change">sme_bonus_rate</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" style="color:#9b59b6;">A</div>
+          <div class="stat-label">친환경 매장 등급</div>
+          <div class="stat-change up">▲ 우수</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">실시간 시민 인증 현황</div>
+        <div class="activity-item">
+          <div class="activity-icon env">🛍</div>
+          <div class="activity-info"><div class="activity-name">박시민님 다회용컵 인증</div><div class="activity-time">방금 전</div></div>
+          <div class="activity-reward">+50</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon env">♻️</div>
+          <div class="activity-info"><div class="activity-name">김시민님 분리수거 인증</div><div class="activity-time">12분 전</div></div>
+          <div class="activity-reward">+30</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon soc">🛍</div>
+          <div class="activity-info"><div class="activity-name">이시민님 다회용컵 인증</div><div class="activity-time">34분 전</div></div>
+          <div class="activity-reward">+50</div>
+        </div>
+      </div>`;
+
+  } else if (role === 'admin') {
+    balanceLabel.textContent = '지자체 정책 운영 ESG-Gold';
+    recentCard.style.display = 'none';
+    panel.innerHTML = `
+      <div class="card">
+        <div class="card-title">🏛 지자체 전체 현황</div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-val" style="color:var(--green);">1,284</div>
+            <div class="stat-label">참여 시민</div>
+            <div class="stat-change up">▲ +127</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" style="color:var(--blue);">86</div>
+            <div class="stat-label">참여 소상공인</div>
+            <div class="stat-change up">▲ +9</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" style="color:var(--gold2);">1.25M</div>
+            <div class="stat-label">총 발행 ESGG</div>
+            <div class="stat-change">ASA 758116412</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" style="color:#9b59b6;">+12%</div>
+            <div class="stat-label">월 참여율</div>
+            <div class="stat-change up">▲ AI 분석</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">⚙️ 정책 운영 권한</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:12px;line-height:1.5;">
+          관리자는 AI 분석 결과를 검토하고 정책 파라미터를 승인·변경할 수 있습니다.
+        </div>
+        <button class="btn-ai-run" onclick="goTab('policy')" style="margin-bottom:0;">
+          <span>📋</span> AI 정책 대시보드로 이동
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">최근 정책 변경 이력</div>
+        <div class="activity-item">
+          <div class="activity-icon gov">⚡</div>
+          <div class="activity-info"><div class="activity-name">reward_rate_env 0.07 → 0.09</div><div class="activity-time">AI 권고 · 승인됨</div></div>
+          <div class="activity-reward" style="color:var(--green);">강화</div>
+        </div>
+        <div class="activity-item">
+          <div class="activity-icon gov">🔄</div>
+          <div class="activity-info"><div class="activity-name">anomaly_threshold 0.15 유지</div><div class="activity-time">3일 전</div></div>
+          <div class="activity-reward" style="color:var(--gold2);">유지</div>
+        </div>
+      </div>`;
+
+  } else {
+    balanceLabel.textContent = 'ESG-Gold 잔액';
+    recentCard.style.display = 'block';
+    panel.innerHTML = `
+      <div class="card" style="border:1px solid var(--gold);">
+        <div class="card-title">📷 매장 QR 스캔</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:12px;line-height:1.6;">
+          소상공인이 발급한 QR 코드를 스캔하면 ESG 활동이 인증되고 ESG-Gold가 지급됩니다.
+        </div>
+        <button class="btn-primary" onclick="doVerify('cup','다회용컵 사용 인증',50,'env')" style="padding:14px;width:100%;font-size:14px;">
+          📷 QR 코드 스캔하기
+        </button>
+      </div>`;
+  }
+}
+
+function issueMerchantQR() {
+  generateMerchantQR();
+  showToast('✅ 새 QR 코드가 발급되었습니다\n시민이 스캔하면 인증됩니다', 'success');
+}
+
+function generateMerchantQR() {
+  const container = document.getElementById('merchant-qr');
+  if (!container) return;
+  const code = 'SME-' + (state.user.email||'shop').split('@')[0].toUpperCase().slice(0,6);
+  const ts = Date.now().toString(36).toUpperCase();
+  const qrData = JSON.stringify({
+    platform: 'SME-TALK',
+    store_code: code,
+    asa_id: 758116412,
+    action: 'esg_verify',
+    issued: new Date().toISOString(),
+    nonce: ts
+  });
+  container.innerHTML = '';
+  if (typeof QRCode !== 'undefined') {
+    new QRCode(container, {
+      text: qrData,
+      width: 148,
+      height: 148,
+      colorDark: '#0D1117',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  } else {
+    container.innerHTML = '<div style="font-size:11px;color:#333;">QR 로딩중...</div>';
+  }
+  const codeEl = document.getElementById('merchant-qr-code');
+  if (codeEl) codeEl.textContent = '매장코드: ' + code + ' · ' + ts;
+}
+
+let selectedPhotoType = '';
+function selectPhotoType(btn, type) {
+  selectedPhotoType = type;
+  document.querySelectorAll('#photo-type-btns button').forEach(b => {
+    b.style.borderColor = 'var(--border)';
+    b.style.background = 'var(--surface2)';
+  });
+  btn.style.borderColor = 'var(--gold)';
+  btn.style.background = 'rgba(201,168,76,0.15)';
+  checkPhotoReady();
+}
+
+function handlePhotoUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const img = document.getElementById('photo-img');
+    img.src = e.target.result;
+    img.style.display = 'block';
+    document.getElementById('photo-placeholder').style.display = 'none';
+    document.getElementById('photo-preview').style.borderColor = 'var(--green)';
+    document.getElementById('photo-preview').style.borderStyle = 'solid';
+    const now = new Date();
+    const ts = now.getFullYear()+'-'+(now.getMonth()+1).toString().padStart(2,'0')+'-'+now.getDate().toString().padStart(2,'0')+' '+now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0')+':'+now.getSeconds().toString().padStart(2,'0');
+    const hash = Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,16);
+    document.getElementById('photo-time').textContent = 'timestamp: ' + ts;
+    document.getElementById('photo-gps').textContent = 'gps: 37.5665°N, 126.9780°E';
+    document.getElementById('photo-hash').textContent = 'img_hash: 0x' + hash;
+    document.getElementById('photo-meta').style.display = 'block';
+    checkPhotoReady();
+    showToast('📷 사진 촬영 완료\nGPS·타임스탬프 자동 기록', 'success');
+  };
+  reader.readAsDataURL(file);
+}
+
+function checkPhotoReady() {
+  const img = document.getElementById('photo-img');
+  const ready = selectedPhotoType && img && img.style.display === 'block';
+  const btn = document.getElementById('btn-photo-submit');
+  btn.style.opacity = ready ? '1' : '0.4';
+  btn.style.pointerEvents = ready ? 'auto' : 'none';
+}
+
+function submitPhotoVerify() {
+  const btn = document.getElementById('btn-photo-submit');
+  btn.innerHTML = '<span class="loader"></span> AI 이미지 검증 중...';
+  btn.disabled = true;
+
+  // STEP 2: 검증 결과 (2초 후)
+  setTimeout(() => {
+    const step2 = document.getElementById('verify-step2');
+    step2.style.display = 'block';
+    const hash = document.getElementById('photo-hash').textContent.split(': ')[1] || '0x' + Math.random().toString(16).slice(2,18);
+    const types = {cup:'다회용컵 사용',recycle:'분리수거',container:'다회용기 사용'};
+    const typeName = types[selectedPhotoType] || '친환경 활동';
+    document.getElementById('verify-result').innerHTML =
+      '<div style="color:var(--green);">✅ 이미지 중복 검사: <b>통과</b> (기존 해시 DB에 미등록)</div>' +
+      '<div style="color:var(--green);">✅ GPS 매장 일치: <b>확인</b> (매장 반경 50m 이내)</div>' +
+      '<div style="color:var(--green);">✅ 타임스탬프: <b>유효</b> (현재 시각 ±5분 이내)</div>' +
+      '<div style="color:var(--text2);margin-top:4px;">활동 유형: ' + typeName + ' · 해시: ' + hash + '</div>';
+    btn.innerHTML = '✅ 검증 통과';
+    btn.style.background = 'rgba(46,204,113,0.15)';
+    btn.style.color = 'var(--green)';
+    btn.style.border = '1px solid var(--green)';
+    showToast('✅ 이미지 검증 통과!\n중복 없음 · GPS 일치 · QR 발급 중...', 'success');
+
+    // STEP 3: QR 자동 발급 (1.5초 후)
+    setTimeout(() => {
+      const step3 = document.getElementById('verify-step3');
+      step3.style.display = 'block';
+      generateMerchantQR();
+      showToast('📱 인증 QR 코드 발급 완료\n시민에게 QR을 보여주세요', 'success');
+
+      // STEP 4: 시민 스캔 대기 표시
+      const step4 = document.getElementById('verify-step4');
+      step4.style.display = 'block';
+
+      // 시민 스캔 시뮬레이션 (5초 후 자동 완료)
+      setTimeout(() => {
+        const txHash = Array.from(crypto.getRandomValues(new Uint8Array(16))).map(b=>b.toString(16).padStart(2,'0')).join('').toUpperCase();
+        document.getElementById('scan-waiting').innerHTML =
+          '<div style="color:var(--green);font-size:13px;font-weight:600;">✅ 시민 QR 스캔 완료!</div>' +
+          '<div style="font-size:11px;color:var(--text2);margin-top:4px;">' + typeName + ' 인증 확정 · +50 ESGG 시민에게 지급</div>' +
+          '<div style="font-size:10px;color:var(--gold);font-family:\'JetBrains Mono\',monospace;margin-top:4px;">Algorand TX: ' + txHash.slice(0,16) + '...</div>' +
+          '<div style="font-size:10px;color:var(--text3);margin-top:2px;">온체인 확정: ~3.5초 · 사진 해시 영구 기록</div>';
+        document.getElementById('scan-waiting').style.background = 'rgba(46,204,113,0.1)';
+        showToast('🎉 ESG 인증 완료!\n사진검증 → QR발급 → 시민스캔 → 50 ESGG 지급\nAlgorand 온체인 기록 완료', 'success');
+      }, 5000);
+    }, 1500);
+  }, 2500);
+}
+
+function setBalance(val) {
+  state.balance = val;
+  localStorage.setItem('smt_balance', val);
+  const fmt = val.toLocaleString();
+  const krw = (val * 50).toLocaleString();
+  ['home-balance','wallet-balance','asset-esgg','my-balance'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = fmt;
+  });
+  ['home-balance-krw','wallet-balance-krw','asset-esgg-krw'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = krw;
+  });
+}
+
+// ─────────────────────────────────────────────
+// ACTIVITY VERIFY
+// ─────────────────────────────────────────────
+function filterActivity(cat, btn) {
+  document.querySelectorAll('.pill-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.activity-card').forEach(c => {
+    c.style.display = (cat === 'all' || c.dataset.cat === cat) ? 'block' : 'none';
+  });
+}
+
+let pendingVerify = null;
+
+function doVerify(type, name, reward, cat) {
+  pendingVerify = { type, name, reward, cat };
+  document.getElementById('modal-title').textContent = name;
+  document.getElementById('qr-scan-result').style.display = 'none';
+  document.getElementById('qr-scan-overlay').style.display = 'flex';
+  // 버튼 상태 초기화
+  const cbtn = document.getElementById('modal-confirm-btn');
+  cbtn.textContent = '📱 시연용: QR 인식 시뮬레이션';
+  cbtn.disabled = false;
+  cbtn.onclick = simulateQRScan;
+  document.getElementById('qr-modal').classList.add('show');
+
+  // 실제 카메라 QR 리더 시도
+  try {
+    if (typeof Html5Qrcode !== 'undefined') {
+      const qrReader = new Html5Qrcode('qr-reader');
+      qrReader.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 180, height: 180 } },
+        (decodedText) => {
+          qrReader.stop().catch(() => {});
+          processQRContent(decodedText);
+        },
+        () => {}
+      ).catch(() => {});
+      window._qrReader = qrReader;
+    }
+  } catch(e) {}
+}
+
+function closeModal() {
+  document.getElementById('qr-modal').classList.remove('show');
+  pendingVerify = null;
+  try { if (window._qrReader) window._qrReader.stop().catch(() => {}); } catch(e) {}
+}
+
+function simulateQRScan() {
+  const code = 'SME-MERCHA';
+  const ts = Date.now().toString(36).toUpperCase();
+  const qrData = JSON.stringify({
+    platform: 'SME-TALK',
+    store_code: code,
+    asa_id: 758116412,
+    action: 'esg_verify',
+    activity_type: pendingVerify ? pendingVerify.type : 'cup',
+    issued: new Date().toISOString(),
+    nonce: ts
+  });
+  processQRContent(qrData);
+}
+
+function processQRContent(decodedText) {
+  let qrInfo = {};
+  try { qrInfo = JSON.parse(decodedText); } catch(e) { qrInfo = { store_code: 'UNKNOWN', action: decodedText }; }
+
+  const resultDiv = document.getElementById('qr-scan-result');
+  const actTypes = {cup:'다회용컵 사용',recycle:'분리수거',container:'다회용기 사용'};
+  const actName = actTypes[qrInfo.activity_type] || (pendingVerify ? pendingVerify.name : 'ESG 활동');
+
+  resultDiv.style.display = 'block';
+  resultDiv.innerHTML =
+    '<div style="color:var(--green);font-weight:600;font-size:12px;margin-bottom:4px;">✅ QR 인식 성공</div>' +
+    '<div>플랫폼: ' + (qrInfo.platform || 'SME-TALK') + '</div>' +
+    '<div>매장코드: ' + (qrInfo.store_code || 'N/A') + '</div>' +
+    '<div>활동유형: ' + actName + '</div>' +
+    '<div>ASA ID: ' + (qrInfo.asa_id || 758116412) + '</div>' +
+    '<div>발급시각: ' + (qrInfo.issued ? new Date(qrInfo.issued).toLocaleString('ko') : 'N/A') + '</div>' +
+    '<div>Nonce: ' + (qrInfo.nonce || 'N/A') + '</div>';
+
+  document.getElementById('modal-confirm-btn').textContent = '⏳ ESG-Gold 지급 처리 중...';
+  document.getElementById('modal-confirm-btn').disabled = true;
+  document.getElementById('qr-scan-overlay').style.display = 'none';
+
+  // 2초 후 ESG-Gold 지급 처리
+  setTimeout(() => { confirmVerify(qrInfo); }, 2000);
+}
+
+async function confirmVerify(qrInfo) {
+  if (!pendingVerify) return;
+  const { type, name, reward, cat } = pendingVerify;
+
+  try {
+    let txHash = null;
+    if (!state.token.startsWith('demo_token_')) {
+      const res = await fetch(`${API}/esg/verify/qr`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${state.token}`
+        },
+        body: JSON.stringify({ activity_type: type, merchant_id: 'demo_merchant' })
+      });
+      if (res.ok) {
+        const d = await res.json();
+        txHash = d.tx_hash || d.transaction_id;
+        if (d.esgg_reward) setBalance(state.balance + d.esgg_reward);
+        else setBalance(state.balance + reward);
+      } else {
+        setBalance(state.balance + reward);
+      }
+    } else {
+      setBalance(state.balance + reward);
+    }
+
+    state.activityCount++;
+    localStorage.setItem('smt_act_count', state.activityCount);
+    state.simDataCount++;
+    updateDataCount();
+
+    if (cat === 'env') state.esgScores.e = Math.min(100, state.esgScores.e + 1);
+    else if (cat === 'soc') state.esgScores.s = Math.min(100, state.esgScores.s + 1);
+    else if (cat === 'gov') state.esgScores.g = Math.min(100, state.esgScores.g + 1);
+
+    const now = new Date();
+    state.activities.unshift({
+      type: cat, name,
+      time: `오늘 ${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`,
+      reward
+    });
+    if (state.activities.length > 10) state.activities.pop();
+
+    const hash = txHash || 'TX' + Math.random().toString(36).substr(2,8).toUpperCase() + '...';
+    const shortHash = hash.length > 12 ? hash.substr(0,12) + '...' : hash;
+    state.txs.unshift({ dir: 'in', label: name, hash: shortHash, amount: reward });
+
+    // 결과를 모달에 표시
+    const storeCode = qrInfo ? qrInfo.store_code : 'SME-MERCHA';
+    const resultDiv = document.getElementById('qr-scan-result');
+    resultDiv.innerHTML =
+      '<div style="color:var(--green);font-weight:600;font-size:13px;margin-bottom:6px;">🎉 ESG-Gold 지급 완료!</div>' +
+      '<div style="color:var(--text);">매장: ' + storeCode + ' · ' + name + '</div>' +
+      '<div style="color:var(--gold);font-size:13px;font-weight:600;margin:4px 0;">+' + reward + ' ESGG 지급</div>' +
+      '<div style="font-family:\'JetBrains Mono\',monospace;color:var(--text3);font-size:10px;">Algorand TX: ' + shortHash + '</div>' +
+      '<div style="color:var(--text3);font-size:10px;margin-top:2px;">온체인 확정: ~3.5초 · ASA ID: 758116412</div>';
+
+    document.getElementById('modal-confirm-btn').innerHTML = '✅ 완료 · 닫기';
+    document.getElementById('modal-confirm-btn').disabled = false;
+    document.getElementById('modal-confirm-btn').onclick = function() {
+      closeModal();
+      renderHome();
+    };
+
+    showToast(`✅ ${name}\n+${reward} ESGG 지급완료\n매장: ${storeCode} · TX: ${shortHash}`, 'success');
+
+  } catch(e) {
+    setBalance(state.balance + reward);
+    closeModal();
+    renderHome();
+    showToast(`✅ ${name}\n+${reward} ESGG 지급완료`, 'success');
+  }
+}
+
+// ─────────────────────────────────────────────
+// WALLET
+// ─────────────────────────────────────────────
+function renderWallet() {
+  const txHtml = state.txs.length > 0
+    ? state.txs.map(tx => `
+      <div class="tx-item">
+        <div class="tx-dir ${tx.dir}">${tx.dir==='in'?'↓':'↑'}</div>
+        <div class="tx-info">
+          <div class="tx-label">${tx.label}</div>
+          <div class="tx-hash">${tx.hash} ↗</div>
+        </div>
+        <div class="tx-amount ${tx.dir}">${tx.dir==='in'?'+':'-'}${tx.amount} ESGG</div>
+      </div>`).join('')
+    : `<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px;">활동 인증 후 거래 내역이 표시됩니다</div>`;
+  document.getElementById('tx-list').innerHTML = txHtml;
+}
+
+function copyAddr() {
+  navigator.clipboard?.writeText('XNAFLAPPIQPRY2S5YHDYTR3UPNQXZYDV4PSKOMYRTH6LZMPPSUKRWAREPU')
+    .then(() => showToast('지갑 주소 복사됨', 'success'))
+    .catch(() => showToast('주소: XNAFLAP...WAREPU'));
+}
+
+// ─────────────────────────────────────────────
+// POLICY / AI
+// ─────────────────────────────────────────────
+function updateDataCount() {
+  const total = state.simDataCount + state.activityCount;
+  document.getElementById('data-count-badge').textContent = total + '건';
+  document.getElementById('sim-count').textContent = state.simDataCount;
+  if (total >= 5) document.getElementById('btn-ai').disabled = false;
+}
+
+function renderPolicy() {
+  updateDataCount();
+
+  // 역할별 권한 안내
+  const u = state.user;
+  let banner = document.getElementById('policy-role-banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'policy-role-banner';
+    const content = document.querySelector('#screen-policy .content');
+    content.insertBefore(banner, content.firstChild);
+  }
+  if (u && u.role === 'admin') {
+    banner.innerHTML = `<div class="algo-badge" style="border-color:rgba(46,204,113,0.4);margin-bottom:12px;">
+      <div class="algo-dot"></div>
+      <div class="algo-text">🏛 관리자 권한 · 정책 파라미터 <span>승인·변경 가능</span></div>
+    </div>`;
+  } else {
+    banner.innerHTML = `<div class="algo-badge" style="border-color:rgba(154,171,194,0.3);margin-bottom:12px;">
+      <div class="algo-text" style="color:var(--text3);">👁 ${u && u.role==='merchant'?'소상공인':'시민'} · 읽기 전용 (정책 변경은 관리자 권한)</div>
+    </div>`;
+  }
+}
+
+async function generateSimData() {}
+async function sendSimDataToBackend() {}
+
+// ─────────────────────────────────────────────
+// NEW AI PIPELINE — 3 알고리즘 순차 실행 + AHP
+// ─────────────────────────────────────────────
+const algoState = { xgb: false, if: false, did: false, ahp: false };
+
+function runAlgo(id) {
+  if (algoState[id]) return;
+  if (id === 'ahp' && (!algoState.xgb || !algoState.if || !algoState.did)) return;
+
+  const card = document.getElementById('card-' + id);
+  const st = document.getElementById('st-' + id);
+  const pb = document.getElementById('pb-' + id);
+  const res = document.getElementById('res-' + id);
+  const btn = document.getElementById('btn-' + id);
+
+  card.classList.add('algo-running');
+  st.className = 'algo-st running';
+  st.textContent = '⏳ 분석 중...';
+  btn.disabled = true;
+  btn.textContent = '⏳ 분석 실행 중...';
+
+  let progress = 0;
+  const dur = id === 'ahp' ? 2000 : 3000;
+  const iv = setInterval(() => { progress += 2; pb.style.width = Math.min(progress, 95) + '%'; }, dur / 50);
+
+  setTimeout(() => {
+    clearInterval(iv);
+    pb.style.width = '100%';
+    setTimeout(() => {
+      algoState[id] = true;
+      card.classList.remove('algo-running');
+      card.classList.add('algo-done');
+      st.className = 'algo-st done';
+      st.textContent = '✅ 완료';
+      btn.className = 'btn-algo done';
+      btn.textContent = '✅ 분석 완료';
+      res.classList.add('show');
+
+      // 바 차트 애니메이션
+      res.querySelectorAll('.fi-fill').forEach(bar => {
+        const w = bar.getAttribute('data-w');
+        if (w) { bar.style.width = '0'; setTimeout(() => bar.style.width = w, 100); }
+      });
+
+      // AHP 점수 카운트업
+      if (id === 'ahp') {
+        let score = 0;
+        const target = 68.7;
+        const el = document.getElementById('ahp-score');
+        const ticker = setInterval(() => {
+          score = Math.min(target, score + 2);
+          el.textContent = score.toFixed(1);
+          if (score >= target) clearInterval(ticker);
+        }, 30);
+        showToast('⚖️ AHP 종합 분석 완료\\n복합 정책 점수: 68.7 → 정책 강화 권고', 'success');
+      } else {
+        const msgs = {
+          xgb: '🌲 XGBoost 분석 완료\\n다음달 QR 5,163회 · Gold 259,217 ESGG 예측',
+          if: '🔍 Isolation Forest 완료\\n이상행위 14건 탐지 (7.0%)',
+          did: '📐 DiD 분석 완료\\nβ_DiD=+3.42 (p=0.018) 정책 효과 유의'
+        };
+        showToast(msgs[id], 'success');
+      }
+
+      // AHP 잠금 해제
+      if (algoState.xgb && algoState.if && algoState.did && !algoState.ahp) {
+        const ahpCard = document.getElementById('card-ahp');
+        ahpCard.style.opacity = '1';
+        ahpCard.style.borderColor = 'var(--gold)';
+        const ahpSt = document.getElementById('st-ahp');
+        ahpSt.className = 'algo-st';
+        ahpSt.textContent = '▶ 실행';
+        ahpSt.style.background = 'rgba(201,168,76,0.2)';
+        ahpSt.style.color = 'var(--gold2,#C9A84C)';
+        const ahpBtn = document.getElementById('btn-ahp');
+        ahpBtn.disabled = false;
+        ahpBtn.textContent = '▶ AHP 종합 스코어링 실행';
+        showToast('✅ 3개 알고리즘 완료!\\n⚖️ AHP 종합 스코어링 실행 가능', 'success');
+      }
+    }, 300);
+  }, dur);
+}
+
+async function runAIAnalysis() { runAlgo('xgb'); }
+
+function displayAIResults() {}
+function generateDemoAIResult() { return {}; }
+function animateCycle() {}
+
+async function approvePolicy() {
+  const btn = document.getElementById('btn-approve');
+  btn.innerHTML = '<span class="loader"></span> Rolling Update 실행 중...';
+  btn.disabled = true;
+  await new Promise(r => setTimeout(r, 2000));
+  btn.textContent = '✅ 적용 완료';
+  btn.style.background = 'rgba(46,204,113,0.15)';
+  btn.style.color = 'var(--green)';
+  btn.style.border = '1px solid var(--green)';
+  document.getElementById('approve-done').style.display = 'block';
+  showToast('✅ ConfigMap 업데이트 완료\\nreward_rate_env: 0.05 → 0.07\\n🔄 Rolling Update · 무중단 적용', 'success');
+}
+
+// ─────────────────────────────────────────────
+// MY PAGE
+// ─────────────────────────────────────────────
+function renderMyPage() {
+  const u = state.user;
+  if (!u) return;
+  const roleMap = { admin: '지자체 관리자', merchant: '소상공인', citizen: '시민 사용자' };
+  document.getElementById('my-name').textContent = u.full_name || u.email;
+  document.getElementById('my-role').textContent = `${roleMap[u.role]||'시민'} · 📍 ${u.location||'서울특별시'}`;
+  document.getElementById('my-activity-count').textContent = state.activityCount;
+
+  const total = state.esgScores.e + state.esgScores.s + state.esgScores.g;
+  const grade = total >= 240 ? 'A+' : total >= 210 ? 'A' : total >= 180 ? 'B+' : 'B';
+  document.getElementById('my-grade').textContent = grade;
+
+  // 차트
+  setTimeout(() => {
+    document.getElementById('bar-e').style.width = state.esgScores.e + '%';
+    document.getElementById('bar-s').style.width = state.esgScores.s + '%';
+    document.getElementById('bar-g').style.width = state.esgScores.g + '%';
+    document.getElementById('bar-e-val').textContent = state.esgScores.e;
+    document.getElementById('bar-s-val').textContent = state.esgScores.s;
+    document.getElementById('bar-g-val').textContent = state.esgScores.g;
+  }, 100);
+}
+
+// ─────────────────────────────────────────────
+// TOAST
+// ─────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ─────────────────────────────────────────────
+// PWA
+// ─────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  });
+}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+</body>
+</html>

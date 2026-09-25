@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-04-02T13:41:44.926369",
+  "policy_score": 52.04,
+  "recommendation": "현상 유지",
+  "new_params": {
+    "reward_rate_env": 0.05,
+    "sme_bonus_rate": 0.1,
+    "anomaly_threshold": 0.15,
+    "monthly_issue_cap": 10000,
+    "policy_status": "ACTIVE"
+  },
+  "metrics": {
+    "participation": 51.33,
+    "anomaly_normal_rate": 85.0,
+    "did_effect": 4.38
+  }
+}
